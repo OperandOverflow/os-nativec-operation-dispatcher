@@ -1,0 +1,8 @@
+10
+10
+1
+1
+1 
+samples/admpor.log
+samples/admpor.statistics
+10
