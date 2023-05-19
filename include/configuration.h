@@ -30,7 +30,7 @@ int load_config_file(struct ConfigurationFile* config_file, struct main_data* da
 #define INIT_LOAD_CONFIGFILE "Load Config File"
 
 // Information messages
-#define INFO_LOADED_CONFIGFILE "\033[1;32m[+]\033[0m \033[1;36m%s\033[0m was successfully loaded!\033[0m\n"
+#define INFO_LOADED_CONFIGFILE "\033[1;32m[+]\033[0m \033[1;36m%s\033[0m was successfully loaded as configuration file!\033[0m\n"
 
 // Error handling constants
 #define ERROR_CONFIGFILE_OPEN "Error: Failed to open the file.\n"

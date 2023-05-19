@@ -25,7 +25,6 @@ struct LoggingFile* LOG_INIT(char* filename) {
     struct LoggingFile* logger = (struct LoggingFile*)create_dynamic_memory(sizeof(struct LoggingFile));
     if (logger != NULL) {
         strcpy(logger->filename, filename);
-        printf("FILENAME IS %s\n", logger->filename);
         logger->ptr = fopen(logger->filename, "a+");
 
         // verify if there was a problem during file opening
@@ -33,6 +32,7 @@ struct LoggingFile* LOG_INIT(char* filename) {
             perror(ERROR_LOGFILE_OPEN);
             exit(EXIT_LOGFILE_OPEN_ERROR);
         }
+        printf(INFO_LOADED_LOGFILE, logger->filename);
     }
     return logger;
 }

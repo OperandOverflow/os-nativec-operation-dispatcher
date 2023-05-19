@@ -28,6 +28,9 @@ void ADMPOR_LOG(struct LoggingFile* logger, char* message);
 /* Função que destrói um Logger*/
 void LOG_FREE(struct LoggingFile* logger);
 
+// Information messages
+#define INFO_LOADED_LOGFILE "\033[1;32m[+]\033[0m \033[1;36m%s\033[0m was successfully loaded as log file!\033[0m\n"
+
 /* Error handling messages */
 
 #define ERROR_LOGFILE_FILENAME_EXCEDEED "Error: Unable to create log file, due to filename exceeded exception.\n"
