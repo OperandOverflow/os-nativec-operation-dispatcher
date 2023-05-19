@@ -22,6 +22,11 @@
 #include "configuration.h"
 #include "synchronization.h"
 #include "synchronization-private.h"
+#include "log.h"
+
+
+// global logger
+struct LoggingFile* logger = NULL;
 
 // global counter of created operations
 int operation_number = 0;
@@ -51,6 +56,7 @@ void main_args(int argc, char* argv[], struct main_data *data) {
     struct ConfigurationFile* config_file = config_file_init(argv[1]);
     load_config_file(config_file, data);
     config_file_free(config_file);
+    logger = LOG_INIT(data->log_filename);
 }
 
 void create_dynamic_memory_buffers(struct main_data *data) {
@@ -125,6 +131,10 @@ void create_request(int* op_counter, struct comm_buffers* buffers, struct main_d
         return;
     }
 
+    char command[32];
+    sprintf(command, "op %d %d", client_id, enterprise_id);
+    ADMPOR_LOG(logger, command);
+
     if (client_id < 0 || client_id >= data->n_clients || enterprise_id < 0 || enterprise_id >= data->n_enterprises) {
         printf(ERROR_IDS_OUT_OF_BOUNDS);
         return;
@@ -174,6 +184,10 @@ void read_status(struct main_data* data, struct semaphores* sems) {
         return;
     }
 
+    char command[32];
+    sprintf(command, "status %d", operation_id);
+    ADMPOR_LOG(logger, command);
+
     //Validate input
     if (operation_id < 0 || operation_id >= operation_number) {
         printf(ERROR_OPERATION_ID);
@@ -199,6 +213,7 @@ void read_status(struct main_data* data, struct semaphores* sems) {
 }
 
 void help() {
+    ADMPOR_LOG(logger, "help");
     printf("%s\n", HELP_MSG);
 }
 
@@ -270,12 +285,14 @@ void destroy_memory_buffers(struct main_data* data, struct comm_buffers* buffers
 }
 
 void stop_execution(struct main_data* data, struct comm_buffers* buffers, struct semaphores* sems) {
+    ADMPOR_LOG(logger, "stop");
     *(data->terminate) = 1;
     wakeup_processes(data, sems);
     wait_processes(data);
     write_statistics(data);
     destroy_memory_buffers(data, buffers);
     destroy_semaphores(sems);
+    LOG_FREE(logger);
     
 }
 
@@ -304,6 +321,7 @@ void user_interaction(struct comm_buffers *buffers, struct main_data *data, stru
         } else if (strcmp(input, "help") == 0) {
             help();
         } else {
+            ADMPOR_LOG(logger, input);
             printf(ERROR_UNRECOGNIZED_COMMAND);
         }
     }
@@ -391,6 +409,7 @@ void alarm_handler(int interval) {
 }
 
 int main(int argc, char *argv[]) {
+    
     //init data structures
     struct main_data* data = create_dynamic_memory(sizeof(struct main_data));
     struct comm_buffers* buffers = create_dynamic_memory(sizeof(struct comm_buffers));
@@ -429,8 +448,7 @@ int main(int argc, char *argv[]) {
         EXIT_FAILURE
     );
     //execute main code
-    main_args(argc, argv, data);
-    
+    main_args(argc, argv, data);    
     create_dynamic_memory_buffers(data);
     verify_condition(
         !data->client_pids || !data->intermediary_pids || !data->enterprise_pids 
