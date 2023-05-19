@@ -34,3 +34,14 @@ void convert_localtime(struct timespec* spec, char* str, int size) {
     strcat(str, miliseconds);
 
 }
+
+char* getCurrentTimeStr(char* format) {
+    time_t rawtime;
+    struct tm *local;
+    static char datetime[20];
+
+    time(&rawtime);
+    local = localtime(&rawtime);
+    strftime(datetime, sizeof(datetime), format, local);
+    return datetime;
+}
