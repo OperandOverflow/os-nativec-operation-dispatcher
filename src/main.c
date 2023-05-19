@@ -387,7 +387,7 @@ void signal_handler_main(int i) {
 
 void alarm_handler(int interval) {
     alarm_print_status(global_data, global_sems);
-    set_timer((int) global_data->alarm_time, alarm_handler);
+    set_timer(global_data->alarm_time, alarm_handler);
 }
 
 int main(int argc, char *argv[]) {
@@ -471,7 +471,7 @@ int main(int argc, char *argv[]) {
     // associate SIGINT with a handler function
     set_intr_handler(signal_handler_main);
 
-    set_timer((int) data->alarm_time, alarm_handler);
+    set_timer(data->alarm_time, alarm_handler);
 
     printf(MENU_MSG);
     // launch user interaction menu
