@@ -3,6 +3,6 @@
 4
 1
 4 
-samples/admpor.log
-samples/admpor.statistics
+sample/admpor.log
+sample/admpor.stats
 8
