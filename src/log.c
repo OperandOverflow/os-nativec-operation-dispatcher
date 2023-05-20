@@ -11,28 +11,24 @@
 
 #include "aptime.h"
 #include "memory.h"
+#include "main-private.h"
 #include "log.h"
 
 
 
 struct LoggingFile* LOG_INIT(char* filename) {
-    // verify if filename is short enough
-    if (strlen(filename) > FILENAME_MAX_SIZE) {
-        perror(ERROR_LOGFILE_FILENAME_EXCEDEED);
-        exit(EXIT_FILENAME_EXCEDEED_ERROR);
-    }
-
     struct LoggingFile* logger = (struct LoggingFile*)create_dynamic_memory(sizeof(struct LoggingFile));
     if (logger != NULL) {
-        strcpy(logger->filename, filename);
-        logger->ptr = fopen(logger->filename, "a+");
+        logger->ptr = fopen(filename, "a+");
 
         // verify if there was a problem during file opening
-        if (logger->ptr == NULL) {
-            perror(ERROR_LOGFILE_OPEN);
-            exit(EXIT_LOGFILE_OPEN_ERROR);
-        }
-        printf(INFO_LOADED_LOGFILE, logger->filename);
+        verify_condition(
+            logger->ptr == NULL,
+            INIT_LOGFILE,
+            ERROR_LOGFILE_OPEN,
+            EXIT_LOGFILE_OPEN_ERROR
+        );
+        printf(INFO_LOADED_LOGFILE, filename);
     }
     return logger;
 }
@@ -54,5 +50,5 @@ void LOG_FREE(struct LoggingFile* logger) {
         return;
     
     fclose(logger->ptr);
-    logger->ptr = NULL;
+    destroy_dynamic_memory(logger);
 }
