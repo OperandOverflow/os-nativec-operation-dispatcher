@@ -34,7 +34,7 @@ struct main_data {
 
 	char* log_filename;
 	char* statistics_filename;
-	char* alarm_time;
+	int alarm_time;
 };
 
 

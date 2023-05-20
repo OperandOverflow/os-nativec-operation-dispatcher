@@ -28,4 +28,9 @@ long long convert_raw(struct timespec* spec);
 */
 void convert_localtime(struct timespec* spec, char* str, int size);
 
+/**
+ * Função que recebe um formato de data e devolve a data atual nesse formato (em string)
+*/
+char* getCurrentTimeStr(char* format);
+
 #endif
