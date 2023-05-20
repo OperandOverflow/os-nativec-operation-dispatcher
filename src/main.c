@@ -54,9 +54,7 @@ void usage_menu(int argc, char** argv) {
 }
 
 void main_args(int argc, char* argv[], struct main_data *data) { 
-    struct ConfigurationFile* config_file = config_file_init(argv[1]);
-    load_config_file(config_file, data);
-    config_file_free(config_file);
+    parse_config_file(argv[1], data);
     logger = LOG_INIT(data->log_filename);
 }
 
