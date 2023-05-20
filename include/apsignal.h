@@ -24,4 +24,15 @@ void set_intr_handler(void (*handler)(int));
 */
 void interrupt_process(int process_id);
 
+// ====================================================================================================
+//                                          ERROR HANDLING
+// ====================================================================================================
+// Sections
+#define INIT_ALARM "Init alarm"
+#define INIT_INTR "Init interrupt"
+
+#define ERROR_REGISTER_SIGNAL_HANDLER "Error: Failed to register signal handler.\n"
+
+
+#define EXIT_REGISTER_SIGNAL_HANDLER_ERROR 314
 #endif
