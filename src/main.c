@@ -380,6 +380,8 @@ void alarm_print_status(struct main_data* data, struct semaphores* sems) {
     semaphore_mutex_lock(sems->results_mutex);
     printf("\33[2K");
     printf(ALARM_MSG_BEGIN);
+    if (operation_number == 0)
+        printf(ALARM_MSG_NOP);
     for (int i = 0; i < operation_number; i++)
     {
         //Read operation status
