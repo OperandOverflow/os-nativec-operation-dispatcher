@@ -260,18 +260,7 @@ void wait_processes(struct main_data* data) {
         data->enterprise_stats[i] = wait_process(data->enterprise_pids[i]);
 }
 
-void destroy_memory_buffers(struct main_data* data, struct comm_buffers* buffers) {
-    // first shared memory
-    destroy_shared_memory(STR_SHM_MAIN_CLIENT_PTR, buffers->main_client->ptrs, data->buffers_size);
-    destroy_shared_memory(STR_SHM_MAIN_CLIENT_BUFFER, buffers->main_client->buffer, data->buffers_size);
-    destroy_shared_memory(STR_SHM_CLIENT_INTERM_PTR, buffers->client_interm->ptrs, data->buffers_size);
-    destroy_shared_memory(STR_SHM_CLIENT_INTERM_BUFFER, buffers->client_interm->buffer, data->buffers_size);
-    destroy_shared_memory(STR_SHM_INTERM_ENTERP_BUFFER, buffers->interm_enterp->buffer, data->buffers_size);
-    destroy_shared_memory(STR_SHM_INTERM_ENTERP_PTR, buffers->interm_enterp->ptrs, data->buffers_size);
-    destroy_shared_memory(STR_SHM_RESULTS, data->results, data->buffers_size);
-    destroy_shared_memory(STR_SHM_TERMINATE, data->terminate, data->buffers_size);
-
-    // then dynamic memory
+void destroy_dynamic_memory_buffers(struct main_data* data, struct comm_buffers* buffers) {
     destroy_dynamic_memory(data->client_pids);
     destroy_dynamic_memory(data->intermediary_pids);
     destroy_dynamic_memory(data->enterprise_pids);
@@ -284,8 +273,25 @@ void destroy_memory_buffers(struct main_data* data, struct comm_buffers* buffers
     destroy_dynamic_memory(buffers->main_client);
     destroy_dynamic_memory(buffers->client_interm);
     destroy_dynamic_memory(buffers->interm_enterp);
-    destroy_dynamic_memory(buffers);    
+    destroy_dynamic_memory(buffers); 
 }
+
+void destroy_memory_buffers(struct main_data* data, struct comm_buffers* buffers) {
+    // first shared memory
+    destroy_shared_memory(STR_SHM_MAIN_CLIENT_PTR, buffers->main_client->ptrs, data->buffers_size);
+    destroy_shared_memory(STR_SHM_MAIN_CLIENT_BUFFER, buffers->main_client->buffer, data->buffers_size);
+    destroy_shared_memory(STR_SHM_CLIENT_INTERM_PTR, buffers->client_interm->ptrs, data->buffers_size);
+    destroy_shared_memory(STR_SHM_CLIENT_INTERM_BUFFER, buffers->client_interm->buffer, data->buffers_size);
+    destroy_shared_memory(STR_SHM_INTERM_ENTERP_BUFFER, buffers->interm_enterp->buffer, data->buffers_size);
+    destroy_shared_memory(STR_SHM_INTERM_ENTERP_PTR, buffers->interm_enterp->ptrs, data->buffers_size);
+    destroy_shared_memory(STR_SHM_RESULTS, data->results, data->buffers_size);
+    destroy_shared_memory(STR_SHM_TERMINATE, data->terminate, data->buffers_size);
+
+    // then dynamic memory
+    destroy_dynamic_memory_buffers(data, buffers);
+   
+}
+
 
 void stop_execution(struct main_data* data, struct comm_buffers* buffers, struct semaphores* sems) {
     ADMPOR_LOG(logger, "stop");
@@ -487,14 +493,14 @@ int main(int argc, char *argv[]) {
         exit(EXIT_SEM_CREATE_ERROR);
     }
 
+    // launch clients, interms and enterps
+    launch_processes(buffers, data, sems);
+
     // ==============================
     global_data = data;
     global_buffers = buffers;
     global_sems = sems;
     // ==============================
-
-    // launch clients, interms and enterps
-    launch_processes(buffers, data, sems);
 
     // init logger
     logger = LOG_INIT(data->log_filename);

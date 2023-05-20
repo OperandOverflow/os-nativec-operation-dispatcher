@@ -22,8 +22,8 @@ void usage_menu(int argc, char** argv);
 // Função para limpar buffer de input do utilizador
 void flush();
 
-// Função que liberta memória alocada ao programa durante a sua execução
-void cleanup_memory(struct comm_buffers* buffers, struct main_data* data);
+// Função que liberta memória dinamica alocada ao programa durante a sua execução
+void destroy_dynamic_memory_buffers(struct main_data* data, struct comm_buffers* buffers);
 
 // Função que imprime as estatisticas de n entidades de acordo com as estatisticas da mesma
 void write_statistic(char* entity, int n, int* stats);
