@@ -14,44 +14,51 @@
 #include "main-private.h"
 
 
-struct ConfigurationFile* config_file_init(char* filename) {
-    struct ConfigurationFile* config_file;
-    config_file = (struct ConfigurationFile*)create_dynamic_memory(sizeof(struct ConfigurationFile));
+struct ConfigurationFile* CONFIG_INIT(char* filename) {
+    struct ConfigurationFile* config_file = (struct ConfigurationFile*)create_dynamic_memory(sizeof(struct ConfigurationFile));
     if (config_file != NULL) {
-        config_file->name = (char *)create_dynamic_memory(strlen(filename));
-        if (config_file->name != NULL)
-            strcpy(config_file->name, filename);
+        config_file->ptr = fopen(filename, "r");
+
+        // verify if there was a problem during file opening
+        verify_condition(
+            config_file->ptr == NULL,
+            INIT_LOAD_CONFIGFILE,
+            ERROR_CONFIGFILE_OPEN,
+            EXIT_CONFIGFILE_OPEN_ERROR
+        );
     }
     return config_file;
 }
 
-void config_file_free(struct ConfigurationFile* config_file) {
-    free(config_file->name);
+void CONFIG_FREE(struct ConfigurationFile* config_file) {
+    if (config_file == NULL)
+        return;
+    
+    fclose(config_file->ptr);
     free(config_file);
 }
 
-int load_config_file(struct ConfigurationFile* config_file, struct main_data* data) {
-    // Open the file (reader mode)
-    config_file->ptr = fopen(config_file->name, "r");
+int CONFIG_LOAD(struct ConfigurationFile* config_file, struct main_data* data, char* config_filename) {
+    // verify if config file is open
+    if (config_file == NULL) {
+        perror(ERROR_CONFIGFILE_NOT_ACTIVE);
+        return -1;
+    }  
 
-    verify_condition(
-        config_file->ptr == NULL,
-        INIT_LOAD_CONFIGFILE,
-        ERROR_CONFIGFILE_OPEN,
-        EXIT_CONFIGFILE_OPEN_ERROR
-    );
     char line[100];
     int line_number = 0;
 
     while (fgets(line, sizeof(line), config_file->ptr) != NULL) {
         line_number++;
-        // Trim newline character at the end of the line
+        // skip processing, if we already processed the required lines
+        if (line_number > CONFIG_FILE_EXPECTED_LINE_COUNT)
+            continue;
+
+        // trim newline character at the end of the line
         if (line[strlen(line) - 1] == '\n')
             line[strlen(line) - 1] = '\0';
 
-        if (line_number > CONFIG_FILE_EXPECTED_LINE_COUNT)
-            return 1;
-
+        // parse and set value to main_data struct with regard to line number
         if (line_number == 1)
             data->max_ops = atoi(line);
         else if (line_number == 2)
@@ -72,20 +79,33 @@ int load_config_file(struct ConfigurationFile* config_file, struct main_data* da
             strcpy(filename, line);
             data->statistics_filename = filename;
         }
-        else
+        else if (line_number == 8)
             data->alarm_time = atoi(line);   
     }
-    // Close the file
-    fclose(config_file->ptr);
 
+    return line_number;
+}
+
+void parse_config_file(char* config_filename, struct main_data* data) {
+    struct ConfigurationFile* config_file = CONFIG_INIT(config_filename);
+    int loadedLines = CONFIG_LOAD(config_file, data, config_filename);
+
+    // exit if the configuration file is missing required fields
     verify_condition(
-        line_number != CONFIG_FILE_EXPECTED_LINE_COUNT,
+        loadedLines < CONFIG_FILE_EXPECTED_LINE_COUNT,
         INIT_LOAD_CONFIGFILE,
-        ERROR_CONFIGFILE_NUMBER_OF_LINES,
+        ERROR_CONFIGFILE_MISSING_REQUIRED_FIELDS,
         EXIT_CONFIGFILE_NUMBER_OF_LINES_ERROR
     );
 
-    // File is correctly defined
-    printf(INFO_LOADED_CONFIGFILE, config_file->name);
-    return 0;
+    // show a warning if the parsing ignored lines
+    if (loadedLines > CONFIG_FILE_EXPECTED_LINE_COUNT)
+        printf(WARNING_CONFIGFILE_NUMBER_OF_LINES, loadedLines, CONFIG_FILE_EXPECTED_LINE_COUNT);
+
+    printf(INFO_LOADED_CONFIGFILE, config_filename);
+
+    // release resources
+    CONFIG_FREE(config_file);
+
+
 }
