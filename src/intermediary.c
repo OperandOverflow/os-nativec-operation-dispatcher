@@ -58,7 +58,7 @@ void intermediary_process_operation(struct operation* op, int interm_id, struct 
     op->receiving_interm = interm_id; // update receiving interm field
     op->status = 'I'; // change status to 'I' (processed by interm)
     struct timespec process_time; // declare empty struct
-    getcurrenttime(&process_time); // fill with current time
+    set_current_time(&process_time); // fill with current time
     op->intermed_time = process_time; // register the time of process
     (*counter)++; // increment counter of this interm's processed operations
     semaphore_mutex_lock(sems->results_mutex);

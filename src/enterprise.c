@@ -61,7 +61,7 @@ void enterprise_process_operation(struct operation* op, int enterp_id, struct ma
     // change status to 'A' or 'E' (processed by enterp)
     op->status = (op->id < data->max_ops) ? 'E' : 'A' ; 
     struct timespec process_time; // declare empty struct
-    getcurrenttime(&process_time); // fill with current time
+    set_current_time(&process_time); // fill with current time
     op->enterp_time = process_time; // register the time of process
     (*counter)++; // increment counter of this enterprise's processed operations
     semaphore_mutex_lock(sems->results_mutex);

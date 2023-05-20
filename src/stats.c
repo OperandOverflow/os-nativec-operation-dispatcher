@@ -58,21 +58,15 @@ void write_operation_statistics(struct operation op, FILE* fpointer) {
         op.receiving_interm, 
         op.receiving_enterp
     );
-    int size = 24;
 
-    char startT[size];
-    convert_localtime(&(op.start_time) , startT, size);
+    // get datetime string representations
+    char* startT = get_datetime_string_from_spec(&(op.start_time));
+    char* clientT = get_datetime_string_from_spec(&(op.client_time));
+    char* intermT = get_datetime_string_from_spec(&(op.intermed_time));
+    char* enterpT = get_datetime_string_from_spec(&(op.enterp_time));
 
-    char clientT[size];
-    convert_localtime(&(op.client_time) , clientT, size);
-
-    char intermT[size];
-    convert_localtime(&(op.intermed_time) , intermT, size);
-
-    char enterpT[size];
-    convert_localtime(&(op.enterp_time) , enterpT, size);
-
-    char totalT[size];
+    // calculate total time
+    char totalT[24];
     calculate_difference(&(op.enterp_time), &(op.start_time), totalT);
 
     fprintf(

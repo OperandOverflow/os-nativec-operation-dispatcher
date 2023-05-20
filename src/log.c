@@ -39,9 +39,9 @@ void ADMPOR_LOG(struct LoggingFile* logger, char* message) {
         perror(ERROR_LOGFILE_NOT_ACTIVE);
         return;
     }    
-    char *timestamp = getCurrentTimeStr("%Y-%m-%d %H:%M:%S");   
+    char *datetime = get_current_datetime_string();   
     // write message
-    fprintf(logger->ptr, "%s %s\n", timestamp, message);
+    fprintf(logger->ptr, "%s %s\n", datetime, message);
     fflush(logger->ptr);
 }
 

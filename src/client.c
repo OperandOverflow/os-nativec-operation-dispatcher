@@ -62,7 +62,7 @@ void client_process_operation(struct operation* op, int client_id, struct main_d
     op->receiving_client = client_id; // update receiving client field
     op->status = 'C'; // change status to 'C' (processed by client)
     struct timespec process_time; // declare empty struct
-    getcurrenttime(&process_time); // fill with current time
+    set_current_time(&process_time); // fill with current time
     op->client_time = process_time; // register the time of process
     (*counter)++; // increment counter of this client's processed operations
     semaphore_mutex_lock(sems->results_mutex);

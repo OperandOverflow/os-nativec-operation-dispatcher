@@ -151,7 +151,7 @@ void create_request(int* op_counter, struct comm_buffers* buffers, struct main_d
     op.requested_enterp = enterprise_id;
     op.status = 'M';
     struct timespec process_time; // declare empty struct
-    getcurrenttime(&process_time); // fill with current time
+    set_current_time(&process_time); // fill with current time
     op.start_time = process_time; // register the time of start
     semaphore_mutex_unlock(sems->results_mutex);
 
