@@ -4,51 +4,51 @@
 #include <string.h>
 
 #include "aptime.h"
+#include "main-private.h"
 
 
-void getcurrenttime(struct timespec* spec) {
-    if ( clock_gettime(CLOCK_REALTIME, spec) == -1)
-    {
-        perror("clock gettime");
-        exit(EXIT_FAILURE);
-    }
-    return;
+void set_current_time(struct timespec* spec) {
+    verify_condition(
+        clock_gettime(CLOCK_REALTIME, spec) == -1,
+        INIT_CLOCKGETTIME,
+        ERROR_CLOCKGETTIME,
+        EXIT_CLOCKGETTIME_ERROR
+    );
 }
 
-long long convert_raw(struct timespec* spec) {
-    return spec->tv_sec;
-}
+char* get_datetime_string_from_rawtime(time_t rawtime, char* format) {
+    struct tm *local = localtime(&rawtime);
+    static char datetime[32];
 
-void convert_localtime(struct timespec* spec, char* str, int size) {
-
-    time_t rawtime = spec->tv_sec;
-    struct tm* local;
-
-    local = localtime(&rawtime);
-    
-    char miliseconds[16];
-    int nanoseconds = ((int)(spec->tv_nsec))/1000000;
-    sprintf(miliseconds, "%d", nanoseconds);
-
-    strftime(str, size, "%F %H:%M:%S.", local);
-    strcat(str, miliseconds);
-
-}
-
-char* getCurrentTimeStr(char* format) {
-    time_t rawtime;
-    struct tm *local;
-    static char datetime[20];
-
-    time(&rawtime);
-    local = localtime(&rawtime);
     strftime(datetime, sizeof(datetime), format, local);
     return datetime;
 }
 
+long long convert_raw(struct timespec* spec) {
+    return spec->tv_sec * 1000000000LL + spec->tv_nsec;
+}
+
+char* get_datetime_string_from_spec(struct timespec* spec) {
+    // get string datetime from tv_sec
+    char* datetime = get_datetime_string_from_rawtime(spec->tv_sec, "%Y-%m-%d %H:%M:%S");
+    
+    // compute decimal seconds (.values) from tv_nsec
+    char miliseconds[16];
+    sprintf(miliseconds, ".%.3ld", spec->tv_nsec / 1000000);
+
+    // concat millisec to datetime
+    strcat(datetime, miliseconds);
+    return datetime;
+}
+
+char* get_current_datetime_string() {
+    struct timespec spec;
+    set_current_time(&spec);
+    return get_datetime_string_from_spec(&spec);
+}
+
 void calculate_difference(struct timespec* t1, struct timespec* t2, char* str) {
-    if (t1->tv_sec < t2->tv_sec)
-    {
+    if (t1->tv_sec < t2->tv_sec) {
         calculate_difference(t2, t1, str);
         return;
     }
