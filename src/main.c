@@ -55,7 +55,6 @@ void usage_menu(int argc, char** argv) {
 
 void main_args(int argc, char* argv[], struct main_data *data) { 
     parse_config_file(argv[1], data);
-    logger = LOG_INIT(data->log_filename);
 }
 
 void create_dynamic_memory_buffers(struct main_data *data) {
@@ -373,7 +372,13 @@ void destroy_semaphores(struct semaphores* sems) {
     semaphore_destroy(STR_SEM_CLIENT_INTERM_MUTEX, sems->client_interm->mutex);
     semaphore_destroy(STR_SEM_INTERM_ENTERP_MUTEX, sems->interm_enterp->mutex);
     semaphore_destroy(STR_SEM_MAIN_CLIENT_MUTEX, sems->main_client->mutex); 
-    semaphore_destroy(STR_SEM_RESULTS_MUTEX, sems->results_mutex);  
+    semaphore_destroy(STR_SEM_RESULTS_MUTEX, sems->results_mutex); 
+
+    destroy_dynamic_memory(sems->client_interm);
+    destroy_dynamic_memory(sems->interm_enterp);
+    destroy_dynamic_memory(sems->main_client);
+
+    destroy_dynamic_memory(sems);
 }
 
 void alarm_print_status(struct main_data* data, struct semaphores* sems) {
@@ -490,6 +495,9 @@ int main(int argc, char *argv[]) {
 
     // launch clients, interms and enterps
     launch_processes(buffers, data, sems);
+
+    // init logger
+    logger = LOG_INIT(data->log_filename);
 
     // associate SIGINT with a handler function
     set_intr_handler(signal_handler_main);

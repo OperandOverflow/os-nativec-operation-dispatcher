@@ -46,9 +46,7 @@ void ADMPOR_LOG(struct LoggingFile* logger, char* message) {
 }
 
 void LOG_FREE(struct LoggingFile* logger) {
-    if (logger == NULL)
-        return;
-    
-    fclose(logger->ptr);
+    if (logger != NULL)
+        fclose(logger->ptr);
     destroy_dynamic_memory(logger);
 }

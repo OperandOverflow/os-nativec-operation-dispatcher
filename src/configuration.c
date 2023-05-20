@@ -31,10 +31,8 @@ struct ConfigurationFile* CONFIG_INIT(char* filename) {
 }
 
 void CONFIG_FREE(struct ConfigurationFile* config_file) {
-    if (config_file == NULL)
-        return;
-    
-    fclose(config_file->ptr);
+    if (config_file != NULL)
+        fclose(config_file->ptr);
     free(config_file);
 }
 
@@ -70,12 +68,12 @@ int CONFIG_LOAD(struct ConfigurationFile* config_file, struct main_data* data, c
         else if (line_number == 5)
             data->n_enterprises = atoi(line);
         else if (line_number == 6) {
-            char* filename = (char*)create_dynamic_memory(strlen(line));
+            char* filename = (char*)create_dynamic_memory(strlen(line) + 1);
             strcpy(filename, line);
             data->log_filename = filename;
         }
         else if (line_number == 7) {
-            char* filename = (char*)create_dynamic_memory(strlen(line));
+            char* filename = (char*)create_dynamic_memory(strlen(line) + 1);
             strcpy(filename, line);
             data->statistics_filename = filename;
         }
