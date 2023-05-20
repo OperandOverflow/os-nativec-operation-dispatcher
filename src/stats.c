@@ -26,7 +26,8 @@ struct StatsFile* STATS_INIT(char* filename) {
 }
 
 void STATS_FREE(struct StatsFile* stats) {
-    fclose(stats->ptr);
+    if (stats != NULL)
+        fclose(stats->ptr);
     destroy_dynamic_memory(stats);
 }
 
