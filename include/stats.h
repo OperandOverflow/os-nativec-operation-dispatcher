@@ -1,16 +1,30 @@
 #ifndef STATS_H_GUARD
 #define STATS_H_GUARD
 
+#include <stdio.h>
 #include "main.h"
 
+struct StatsFile {
+    FILE* ptr;
+};
+
+/* Função que inicializa a estrutura de stats */
+struct StatsFile* STATS_INIT(char* filename);
+
+/* Função que destrói um stats*/
+void STATS_FREE(struct StatsFile* logger);
+
+/* Função que escreve estatísticas no data->stats_filename */
 void write_stats(struct main_data* data, int op_counter);
 
-void open_file(char* filename);
+/* Função que escreve o conteúdo do ficheiro de estatística */
+void write_content(struct main_data* data, int op_counter, FILE* fpointer);
 
-void write_content(struct main_data* data, int op_counter);
+/* Função que escreve o número de operações processadas por cada entidade (client, interm, enterp) no ficheiro destino */
+void write_processed_operations(struct main_data* data, FILE* fpointer);
 
-void close_file();
-
+/* Função que escreve estatísticas de uma operação no ficheiro destino */
+void write_operation_statistics(struct operation op, FILE* fpointer);
 
 // ====================================================================================================
 //                                              AUXILIARY
@@ -38,9 +52,12 @@ void close_file();
 // Sections
 #define INIT_STATS "Init statistics file"
 
-// Error handling constants
-#define ERROR_FAILED_OPEN_FILE "\033[0;31m[!] Error:\033[0m Failed to create file.\n" 
+// Information
+#define INFO_LOADED_STATSFILE "\033[1;32m[+]\033[0m \033[1;36m%s\033[0m was successfully loaded as stats file!\033[0m\n"
 
-#define EXIT_OPEN_FILE_ERROR 1
+// Error handling constants
+#define ERROR_FAILED_OPEN_STATSFILE "\033[0;31m[!] Error:\033[0m Failed to create file.\n" 
+
+#define EXIT_OPEN_STATSFILE_ERROR 140
 
 #endif
