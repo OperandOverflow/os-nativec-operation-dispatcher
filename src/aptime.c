@@ -70,7 +70,7 @@ void calculate_difference(struct timespec* t1, struct timespec* t2, char* str) {
 
     sprintf(str, "%ld.", dif_sec);
 
-    sprintf(nsec, "%d", dif_nsec);
+    sprintf(nsec, "%lld", dif_nsec);
 
     strcat(str, nsec);
 }
