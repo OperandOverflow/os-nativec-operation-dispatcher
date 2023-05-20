@@ -23,6 +23,7 @@
 #include "synchronization.h"
 #include "synchronization-private.h"
 #include "log.h"
+#include "stats.h"
 
 
 // global logger
@@ -289,11 +290,11 @@ void stop_execution(struct main_data* data, struct comm_buffers* buffers, struct
     *(data->terminate) = 1;
     wakeup_processes(data, sems);
     wait_processes(data);
-    write_statistics(data);
+    write_stats(data, operation_number);
+    // write_statistics(data);
     destroy_memory_buffers(data, buffers);
     destroy_semaphores(sems);
     LOG_FREE(logger);
-    
 }
 
 void user_interaction(struct comm_buffers *buffers, struct main_data *data, struct semaphores* sems) {

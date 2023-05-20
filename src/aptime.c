@@ -64,7 +64,7 @@ void calculate_difference(struct timespec* t1, struct timespec* t2, char* str) {
         dif_sec--;
     } 
     dif_nsec = t1_nsec - t2_nsec;
-    dif_nsec /= 1000000;
+    dif_nsec /= 10000;
 
     char nsec[24];
 
