@@ -37,7 +37,7 @@ void LOG_FREE(struct LoggingFile* logger);
 
 #define ERROR_LOGFILE_ALREADY_EXISTS "Error: Unable to create log file, since the log file is already open.\n"
 #define ERROR_LOGFILE_OPEN "Error: Unable to open log file.\n"
-#define ERROR_LOGFILE_NOT_ACTIVE "Error: Log file is not properly set (active)."
+#define ERROR_LOGFILE_NOT_ACTIVE "Error: Log file is not properly set (open)."
 
 #define EXIT_LOGFILE_ALREADY_EXISTS_ERROR 121
 #define EXIT_LOGFILE_OPEN_ERROR 122
