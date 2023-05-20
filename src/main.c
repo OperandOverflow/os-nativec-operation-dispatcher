@@ -125,16 +125,19 @@ void flush() {
 
 void create_request(int* op_counter, struct comm_buffers* buffers, struct main_data* data, struct semaphores* sems) {
     int client_id, enterprise_id;
+
     // read client id and enterprise id
-    if (scanf("%d %d", &client_id, &enterprise_id) != 2) {
-        printf(ERROR_INVALID_INPUT);
-        flush();
-        return;
-    }
+    int read_items = scanf("%d %d", &client_id, &enterprise_id);
 
     char command[32];
     sprintf(command, "op %d %d", client_id, enterprise_id);
     ADMPOR_LOG(logger, command);
+
+    if (read_items != 2) {
+        printf(ERROR_INVALID_INPUT);
+        flush();
+        return;
+    }
 
     if (client_id < 0 || client_id >= data->n_clients || enterprise_id < 0 || enterprise_id >= data->n_enterprises) {
         printf(ERROR_IDS_OUT_OF_BOUNDS);
@@ -177,17 +180,19 @@ int convert_status_to_int(char status) {
 }
 
 void read_status(struct main_data* data, struct semaphores* sems) {
-    //Read user input
+    // read operation id
     int operation_id;
-    if (scanf("%d", &operation_id) != 1) {
-        printf(ERROR_INVALID_INPUT);
-        flush();
-        return;
-    }
+    int read_items = scanf("%d", &operation_id);
 
     char command[32];
     sprintf(command, "status %d", operation_id);
     ADMPOR_LOG(logger, command);
+
+    if (read_items != 1) {
+        printf(ERROR_INVALID_INPUT);
+        flush();
+        return;
+    }
 
     //Validate input
     if (operation_id < 0 || operation_id >= operation_number) {
@@ -291,7 +296,6 @@ void stop_execution(struct main_data* data, struct comm_buffers* buffers, struct
     wakeup_processes(data, sems);
     wait_processes(data);
     write_stats(data, operation_number);
-    // write_statistics(data);
     destroy_memory_buffers(data, buffers);
     destroy_semaphores(sems);
     LOG_FREE(logger);
