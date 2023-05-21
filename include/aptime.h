@@ -12,7 +12,7 @@ void set_current_time(struct timespec* spec);
 
 /**
  * Function which receives a timespec struct and converts the contained
- * time to the raw format
+ * time to the raw format (nano seconds)
  * @param spec      timespec that contains the time to be converted
  * @return          time in raw format
 */
