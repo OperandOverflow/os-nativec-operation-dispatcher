@@ -20,6 +20,15 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+void flush() {
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF) { }
+}
+
+void safe_free(void* ptr) {
+    if (ptr) free(ptr);
+}
+
 void* create_dynamic_memory(int size) {
     return calloc(1, size);
 }
