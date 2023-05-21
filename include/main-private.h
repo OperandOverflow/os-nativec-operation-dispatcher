@@ -109,7 +109,7 @@ void alarm_print_status(struct main_data* data, struct semaphores* sems);
 #define INFO_STATUS_ENTERP_PROCESSED    "    -> \033[1;36mEnterprise <%d>\033[0m processed operation\n"
 //     - Routine request status update
 #define ALARM_MSG_BEGIN                 "\n[T] Routine operation status update\n"
-#define ALARM_MSG_NOP                   "    # No operation has been created\n"
+#define ALARM_MSG_NOP                   "    # No operation has been created\n\n"
 #define ALARM_MSG_OPERATION             "    * \033[1;34mOperation <%d>\033[0m status %c\n"
 #define ALARM_MSG_MAIN_CREATED          "       -> \033[1;32mMain\033[0m created operation at %lld\n"
 #define ALARM_MSG_CLIENT_PROCESSED      "       -> \033[1;36mClient <%d>\033[0m processed operation at %lld\n"
