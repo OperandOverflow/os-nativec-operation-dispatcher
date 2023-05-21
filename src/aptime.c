@@ -50,5 +50,5 @@ void calculate_difference(struct timespec* t1, struct timespec* t2, char* str) {
     long long delta = convert_raw(t1) - convert_raw(t2);
     int delta_sec = delta / 1000000000LL;
     int delta_msec = (delta % 1000000000LL) / 1000000;
-    snprintf(str, sizeof(str), "%d.%03d", delta_sec, delta_msec);
+    sprintf(str, "%d.%03d", delta_sec, delta_msec);
 }
