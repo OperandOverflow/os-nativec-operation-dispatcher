@@ -25,10 +25,12 @@ void* create_dynamic_memory(int size) {
 }
 
 void destroy_dynamic_memory(void* ptr) {
-    free(ptr);
+    safe_free(ptr);
 }
 
-void destroy_shared_memory(char * name, void * ptr, int size) {
+void destroy_shared_memory(char* name, void* ptr, int size) {
+    if (!ptr) return;
+    
     int uid = getuid();
     char name_uid[strlen(name)+10];
     sprintf(name_uid,"%s_%d", name, uid);

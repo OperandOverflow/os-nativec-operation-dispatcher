@@ -25,23 +25,128 @@
 #include "log.h"
 #include "stats.h"
 
-
-// global logger
-struct LoggingFile* logger = NULL;
-
 // global counter of created operations
 int operation_number = 0;
 
 // global variables
-struct main_data* global_data;
-struct comm_buffers* global_buffers;
-struct semaphores* global_sems;
+struct AdmPorData admpor;
+
+void safe_free(void* ptr) {
+    if (ptr) free(ptr);
+}
+
+int assert_error(int condition, char* snippet_id, char* error_msg) {
+    if (condition)
+        fprintf(stderr, "[%s] %s", snippet_id, error_msg);
+    return condition;
+}
 
 void verify_condition(int condition, char* snippet_id, char* error_msg, int status) {
-    if (condition) {
-        fprintf(stderr, "[%s] %s", snippet_id, error_msg);
-        exit(status);        
+    if(assert_error(
+        condition, snippet_id, error_msg
+    )) exit(status);
+}
+
+void main_data_dynamic_memory_free(struct main_data* data) {
+    if (data != NULL) {
+        destroy_dynamic_memory(data->client_pids);
+        destroy_dynamic_memory(data->intermediary_pids);
+        destroy_dynamic_memory(data->enterprise_pids);
+        destroy_dynamic_memory(data->client_stats);
+        destroy_dynamic_memory(data->intermediary_stats);
+        destroy_dynamic_memory(data->enterprise_stats);
+        destroy_dynamic_memory(data->log_filename);
+        destroy_dynamic_memory(data->statistics_filename);       
     }
+}
+
+void comm_buffers_dynamic_memory_free(struct comm_buffers* buffers) {
+    if (buffers != NULL) {
+        destroy_dynamic_memory(buffers->main_client);
+        destroy_dynamic_memory(buffers->client_interm);
+        destroy_dynamic_memory(buffers->interm_enterp);
+    }
+}
+
+void ADMPORDATA_INIT(int argc, char* argv[]) {
+    // init valid as FALSE and logger as NULL
+    admpor.valid = FALSE;
+    admpor.logger = NULL;
+    int failed;
+
+    //init data structures
+    admpor.data = create_dynamic_memory(sizeof(struct main_data));
+    admpor.buffers = create_dynamic_memory(sizeof(struct comm_buffers));
+    admpor.sems = create_dynamic_memory(sizeof(struct semaphores));
+    failed = !admpor.data || !admpor.buffers || !admpor.sems;
+    if (assert_error(failed, INIT_DS , ERROR_MALLOC))
+        return;
+
+    struct main_data* data = admpor.data;
+    struct comm_buffers* buffers = admpor.buffers;
+    struct semaphores* sems = admpor.sems;
+
+    // init comm_buffers
+    buffers->main_client = create_dynamic_memory(sizeof(struct rnd_access_buffer));
+    buffers->client_interm = create_dynamic_memory(sizeof(struct circular_buffer));
+    buffers->interm_enterp = create_dynamic_memory(sizeof(struct rnd_access_buffer));
+    failed = !buffers->main_client || !buffers->client_interm || !buffers->interm_enterp;
+    if (assert_error(failed, INIT_COMM_BUFFER , ERROR_MALLOC))
+        return;
+
+    // init semaphores
+    sems->main_client = create_dynamic_memory(sizeof(struct prodcons));
+    sems->client_interm = create_dynamic_memory(sizeof(struct prodcons));
+    sems->interm_enterp = create_dynamic_memory(sizeof(struct prodcons));
+    failed = !sems->main_client || !sems->client_interm || !sems->interm_enterp;
+    if (assert_error(failed, INIT_COMM_BUFFER , ERROR_MALLOC))
+        return;
+
+    // parse config file
+    main_args(argc, argv, data);
+    if (data->buffers_size < 0)
+        return; // verify if config parsing failed
+
+    // init main data structure
+    create_dynamic_memory_buffers(data);
+    verify_condition(
+        !data->client_pids || !data->intermediary_pids || !data->enterprise_pids 
+        || !data->client_stats || !data->intermediary_stats || !data->enterprise_stats, 
+        INIT_DMEM_BUFFERS,
+        ERROR_MALLOC,
+        EXIT_FAILURE
+    );
+
+    // init shared memory buffers
+    create_shared_memory_buffers(data, buffers);
+    verify_condition(
+        !data->results || !data->terminate 
+        || !buffers->main_client->ptrs || !buffers->main_client->buffer
+        || !buffers->client_interm->ptrs || !buffers->client_interm->buffer
+        || !buffers->interm_enterp->ptrs || !buffers->interm_enterp->buffer, 
+        INIT_SHMEM_BUFFERS,
+        ERROR_MALLOC,
+        EXIT_FAILURE
+    );
+
+    // create semaphores 
+    create_semaphores(data, sems);
+    if (!are_semaphores_valid(sems)) {
+        printf(ERROR_SEM_CREATE);
+        destroy_semaphores(sems);
+        exit(EXIT_SEM_CREATE_ERROR);
+    }
+
+    // admpor was successfully initialized!
+    admpor.valid = TRUE;
+    return;
+
+}
+
+void ADMPORDATA_FREE() {
+    destroy_memory_buffers(admpor.data, admpor.buffers);
+    destroy_semaphores(admpor.sems);
+    if (admpor.logger) LOG_FREE(admpor.logger);
 }
 
 void usage_menu(int argc, char** argv) {
@@ -128,7 +233,7 @@ void create_request(int* op_counter, struct comm_buffers* buffers, struct main_d
 
     char command[32];
     sprintf(command, "op %d %d", client_id, enterprise_id);
-    ADMPOR_LOG(logger, command);
+    ADMPOR_LOG(admpor.logger, command);
 
     if (read_items != 2) {
         printf(ERROR_INVALID_INPUT);
@@ -183,7 +288,7 @@ void read_status(struct main_data* data, struct semaphores* sems) {
 
     char command[32];
     sprintf(command, "status %d", operation_id);
-    ADMPOR_LOG(logger, command);
+    ADMPOR_LOG(admpor.logger, command);
 
     if (read_items != 1) {
         printf(ERROR_INVALID_INPUT);
@@ -216,7 +321,6 @@ void read_status(struct main_data* data, struct semaphores* sems) {
 }
 
 void help() {
-    ADMPOR_LOG(logger, "help");
     printf("%s\n", HELP_MSG);
 }
 
@@ -261,29 +365,36 @@ void wait_processes(struct main_data* data) {
 }
 
 void destroy_dynamic_memory_buffers(struct main_data* data, struct comm_buffers* buffers) {
-    destroy_dynamic_memory(data->client_pids);
-    destroy_dynamic_memory(data->intermediary_pids);
-    destroy_dynamic_memory(data->enterprise_pids);
-    destroy_dynamic_memory(data->client_stats);
-    destroy_dynamic_memory(data->intermediary_stats);
-    destroy_dynamic_memory(data->enterprise_stats);
-    destroy_dynamic_memory(data->log_filename);
-    destroy_dynamic_memory(data->statistics_filename);
+    // destroy main_data
+    main_data_dynamic_memory_free(data);
     destroy_dynamic_memory(data);
-    destroy_dynamic_memory(buffers->main_client);
-    destroy_dynamic_memory(buffers->client_interm);
-    destroy_dynamic_memory(buffers->interm_enterp);
+
+    // destroy comm buffers
+    comm_buffers_dynamic_memory_free(buffers);
     destroy_dynamic_memory(buffers); 
 }
 
 void destroy_memory_buffers(struct main_data* data, struct comm_buffers* buffers) {
     // first shared memory
-    destroy_shared_memory(STR_SHM_MAIN_CLIENT_PTR, buffers->main_client->ptrs, data->buffers_size);
-    destroy_shared_memory(STR_SHM_MAIN_CLIENT_BUFFER, buffers->main_client->buffer, data->buffers_size);
-    destroy_shared_memory(STR_SHM_CLIENT_INTERM_PTR, buffers->client_interm->ptrs, data->buffers_size);
-    destroy_shared_memory(STR_SHM_CLIENT_INTERM_BUFFER, buffers->client_interm->buffer, data->buffers_size);
-    destroy_shared_memory(STR_SHM_INTERM_ENTERP_BUFFER, buffers->interm_enterp->buffer, data->buffers_size);
-    destroy_shared_memory(STR_SHM_INTERM_ENTERP_PTR, buffers->interm_enterp->ptrs, data->buffers_size);
+    if (!data)
+        return;
+
+    if (buffers) {
+        if (buffers->main_client) {
+            destroy_shared_memory(STR_SHM_MAIN_CLIENT_PTR, buffers->main_client->ptrs, data->buffers_size);
+            destroy_shared_memory(STR_SHM_MAIN_CLIENT_BUFFER, buffers->main_client->buffer, data->buffers_size);
+        }
+        if (buffers->client_interm) {
+            destroy_shared_memory(STR_SHM_CLIENT_INTERM_PTR, buffers->client_interm->ptrs, data->buffers_size);
+            destroy_shared_memory(STR_SHM_CLIENT_INTERM_BUFFER, buffers->client_interm->buffer, data->buffers_size);
+        }
+        if (buffers->interm_enterp) {
+            destroy_shared_memory(STR_SHM_INTERM_ENTERP_BUFFER, buffers->interm_enterp->buffer, data->buffers_size);
+            destroy_shared_memory(STR_SHM_INTERM_ENTERP_PTR, buffers->interm_enterp->ptrs, data->buffers_size);
+        }
+
+    }
+
     destroy_shared_memory(STR_SHM_RESULTS, data->results, data->buffers_size);
     destroy_shared_memory(STR_SHM_TERMINATE, data->terminate, data->buffers_size);
 
@@ -298,16 +409,14 @@ void stop_execution(struct main_data* data, struct comm_buffers* buffers, struct
     wakeup_processes(data, sems);
     wait_processes(data);
     write_stats(data, operation_number);
-    destroy_memory_buffers(data, buffers);
-    destroy_semaphores(sems);
-    LOG_FREE(logger);
+    ADMPORDATA_FREE();
+    exit(EXIT_SUCCESS);
 }
 
 void user_interaction(struct comm_buffers *buffers, struct main_data *data, struct semaphores* sems) {
-    int running = TRUE;
     char input[32]; // user input buffer
 
-    while (running) {
+    while (*(data->terminate) == 0) {
         // sleep 300000 micro sec and launch shell 
         usleep(300000);
         printf(ADMPOR_SHELL);
@@ -323,13 +432,13 @@ void user_interaction(struct comm_buffers *buffers, struct main_data *data, stru
         } else if (strcmp(input, "status") == 0) {
             read_status(data, sems);
         } else if (strcmp(input, "stop") == 0) {
-            ADMPOR_LOG(logger, "stop");
-            running = FALSE;
+            ADMPOR_LOG(admpor.logger, "stop");
             stop_execution(data, buffers, sems);
         } else if (strcmp(input, "help") == 0) {
+            ADMPOR_LOG(admpor.logger, "help");
             help();
         } else {
-            ADMPOR_LOG(logger, input);
+            ADMPOR_LOG(admpor.logger, input);
             printf(ERROR_UNRECOGNIZED_COMMAND);
         }
     }
@@ -415,13 +524,12 @@ void alarm_print_status(struct main_data* data, struct semaphores* sems) {
 }
 
 void signal_handler_main(int i) {
-    stop_execution(global_data, global_buffers, global_sems);
-    exit(EXIT_SUCCESS);
+    stop_execution(admpor.data, admpor.buffers, admpor.sems);
 }
 
 void alarm_handler(int interval) {
-    alarm_print_status(global_data, global_sems);
-    set_timer(global_data->alarm_time, alarm_handler);
+    alarm_print_status(admpor.data, admpor.sems);
+    set_timer(admpor.data->alarm_time, alarm_handler);
 }
 
 int main(int argc, char *argv[]) {
@@ -433,84 +541,26 @@ int main(int argc, char *argv[]) {
         ERROR_ARGS,
         EXIT_FAILURE
     );
-    
-    //init data structures
-    struct main_data* data = create_dynamic_memory(sizeof(struct main_data));
-    struct comm_buffers* buffers = create_dynamic_memory(sizeof(struct comm_buffers));
-    struct semaphores* sems = create_dynamic_memory(sizeof(struct semaphores));
-    verify_condition(!data || !buffers || !sems, INIT_DS , ERROR_MALLOC, EXIT_FAILURE);
 
-    
-
-    buffers->main_client = create_dynamic_memory(sizeof(struct rnd_access_buffer));
-    buffers->client_interm = create_dynamic_memory(sizeof(struct circular_buffer));
-    buffers->interm_enterp = create_dynamic_memory(sizeof(struct rnd_access_buffer));
-    verify_condition(
-        !buffers->main_client || !buffers->client_interm || !buffers->interm_enterp, 
-        INIT_COMM_BUFFER,
-        ERROR_MALLOC,
-        EXIT_FAILURE
-    );
-
-    // init semaphore data structure
-    sems->main_client = create_dynamic_memory(sizeof(struct prodcons));
-    sems->client_interm = create_dynamic_memory(sizeof(struct prodcons));
-    sems->interm_enterp = create_dynamic_memory(sizeof(struct prodcons));
-    verify_condition(
-        !sems->main_client || !sems->client_interm || !sems->interm_enterp, 
-        INIT_COMM_BUFFER,
-        ERROR_MALLOC,
-        EXIT_FAILURE
-    );
-
-    //execute main code
-    main_args(argc, argv, data);    
-    create_dynamic_memory_buffers(data);
-    verify_condition(
-        !data->client_pids || !data->intermediary_pids || !data->enterprise_pids 
-        || !data->client_stats || !data->intermediary_stats || !data->enterprise_stats, 
-        INIT_DMEM_BUFFERS,
-        ERROR_MALLOC,
-        EXIT_FAILURE
-    );
-    
-    create_shared_memory_buffers(data, buffers);
-    verify_condition(
-        !data->results || !data->terminate 
-        || !buffers->main_client->ptrs || !buffers->main_client->buffer
-        || !buffers->client_interm->ptrs || !buffers->client_interm->buffer
-        || !buffers->interm_enterp->ptrs || !buffers->interm_enterp->buffer, 
-        INIT_SHMEM_BUFFERS,
-        ERROR_MALLOC,
-        EXIT_FAILURE
-    );
-
-    // create semaphores 
-    create_semaphores(data, sems);
-    if (!are_semaphores_valid(sems)) {
-        printf(ERROR_SEM_CREATE);
-        destroy_semaphores(sems);
-        exit(EXIT_SEM_CREATE_ERROR);
+    // init AdmPor
+    ADMPORDATA_INIT(argc, argv);
+    if (!admpor.valid) {
+        ADMPORDATA_FREE();
+        exit(EXIT_FAILURE);
     }
-
+    
     // launch clients, interms and enterps
-    launch_processes(buffers, data, sems);
-
-    // ==============================
-    global_data = data;
-    global_buffers = buffers;
-    global_sems = sems;
-    // ==============================
+    launch_processes(admpor.buffers, admpor.data, admpor.sems);
 
     // init logger
-    logger = LOG_INIT(data->log_filename);
+    admpor.logger = LOG_INIT(admpor.data->log_filename);
 
     // associate SIGINT with a handler function
     set_intr_handler(signal_handler_main);
 
-    set_timer(data->alarm_time, alarm_handler);
+    set_timer(admpor.data->alarm_time, alarm_handler);
 
     printf(MENU_MSG);
     // launch user interaction menu
-    user_interaction(buffers, data, sems);
+    user_interaction(admpor.buffers, admpor.data, admpor.sems);
 }

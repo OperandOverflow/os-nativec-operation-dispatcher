@@ -10,6 +10,31 @@
 
 #include "main.h"
 #include "synchronization.h"
+#include "log.h"
+
+/* Função que liberta memória se o apontador não for NULL */
+void safe_free(void* ptr);
+
+/* Função que liberta memória dinamica de uma estrutura main data */
+void main_data_dynamic_memory_free(struct main_data* data);
+
+/* Função que liberta memória dinamica de uma estrutura comm_buffers */
+void comm_buffers_dynamic_memory_free(struct comm_buffers* buffers);
+
+struct AdmPorData {
+    struct main_data* data;
+    struct comm_buffers* buffers;
+    struct semaphores* sems;
+    struct LoggingFile* logger;
+    int valid;
+};
+
+/* Função que inicializa uma instância AdmPorData */
+void ADMPORDATA_INIT(int argc, char* argv[]);
+//struct AdmPorData* ADMPORDATA_INIT(int argc, char* argv[]);
+
+/* Função que liberta uma instância AdmPorData */
+void ADMPORDATA_FREE();
 
 // Função que converte um estado para um número que tenha ordem.
 // ex: convert_status_to_int('M') < convert_status_to_int('C') < convert_status_to_int('I')
@@ -39,6 +64,12 @@ se for o caso, lanca uma excecao com a mensagem error_msg.
 Indica na excecao o "snippet_id" associado ao erro.
 */
 void verify_condition(int condition, char* snippet_id, char* error_msg, int status);
+
+/* Função que verifica se a condicao condition se verifica e,
+se for o caso, imprime a mensagem error_msg. 
+Indica na excecao o "snippet_id" associado ao erro.
+*/
+int assert_error(int condition, char* snippet_id, char* error_msg);
 
 /* Funcao que lanca um processo, dado os buffers de comunicacao, 
 os dados da main, a lista de pids a ser alterada, o numero de processos

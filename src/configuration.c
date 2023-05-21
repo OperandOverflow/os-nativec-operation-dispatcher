@@ -39,7 +39,7 @@ void CONFIG_FREE(struct ConfigurationFile* config_file) {
 int CONFIG_LOAD(struct ConfigurationFile* config_file, struct main_data* data, char* config_filename) {
     // verify if config file is open
     if (config_file == NULL) {
-        perror(ERROR_CONFIGFILE_NOT_ACTIVE);
+        printf(ERROR_CONFIGFILE_NOT_ACTIVE);
         return -1;
     }  
 
@@ -88,13 +88,19 @@ void parse_config_file(char* config_filename, struct main_data* data) {
     struct ConfigurationFile* config_file = CONFIG_INIT(config_filename);
     int loadedLines = CONFIG_LOAD(config_file, data, config_filename);
 
-    // exit if the configuration file is missing required fields
-    verify_condition(
+    // set data to null if the configuration file is missing required fields
+    if (assert_error(
         loadedLines < CONFIG_FILE_EXPECTED_LINE_COUNT,
         INIT_LOAD_CONFIGFILE,
-        ERROR_CONFIGFILE_MISSING_REQUIRED_FIELDS,
-        EXIT_CONFIGFILE_NUMBER_OF_LINES_ERROR
-    );
+        ERROR_CONFIGFILE_MISSING_REQUIRED_FIELDS)
+    ) {
+        // release allocated memory during config load, destroy data and set
+        //main_data_dynamic_memory_free(data);
+        //destroy_dynamic_memory(data);
+        data->buffers_size = -1;
+        CONFIG_FREE(config_file);
+        return;
+    }
 
     // show a warning if the parsing ignored lines
     if (loadedLines > CONFIG_FILE_EXPECTED_LINE_COUNT)
