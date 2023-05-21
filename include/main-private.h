@@ -12,9 +12,6 @@
 #include "synchronization.h"
 #include "log.h"
 
-/* Função que liberta memória se o apontador não for NULL */
-void safe_free(void* ptr);
-
 /* Função que liberta memória dinamica de uma estrutura main data */
 void main_data_dynamic_memory_free(struct main_data* data);
 
@@ -45,9 +42,6 @@ int convert_status_to_int(char status);
 
 // Função que imprime o menu de usage (se aplicavel)
 void usage_menu(int argc, char** argv);
-
-// Função para limpar buffer de input do utilizador
-void flush();
 
 // Função que liberta memória dinamica alocada ao programa durante a sua execução
 void destroy_dynamic_memory_buffers(struct main_data* data, struct comm_buffers* buffers);

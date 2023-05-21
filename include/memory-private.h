@@ -11,6 +11,12 @@
 #define FREE_MEM 0
 #define USED_MEM 1
 
+// Função para limpar buffer de input do utilizador
+void flush();
+
+/* Função que liberta memória se o apontador não for NULL */
+void safe_free(void* ptr);
+
 // Funcao que escreve uma dada operacao em um dado buffer de tamanho buffer_size
 void write_operation_to_rnd_access_buffer(struct rnd_access_buffer* buffer, int buffer_size, struct operation* op);
 

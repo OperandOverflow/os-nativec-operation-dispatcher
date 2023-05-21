@@ -47,29 +47,8 @@ char* get_current_datetime_string() {
 }
 
 void calculate_difference(struct timespec* t1, struct timespec* t2, char* str) {
-    if (t1->tv_sec < t2->tv_sec) {
-        calculate_difference(t2, t1, str);
-        return;
-    }
-
-    long int dif_sec = (long) difftime(t1->tv_sec, t2->tv_sec); // t1 - t2
-
-    long long t1_nsec = t1->tv_nsec;
-    long long t2_nsec = t2->tv_nsec;
-    long long dif_nsec;
-    if (t1_nsec < t2_nsec)
-    {
-        t1_nsec += 1000000000;
-        dif_sec--;
-    } 
-    dif_nsec = t1_nsec - t2_nsec;
-    dif_nsec /= 10000;
-
-    char nsec[24];
-
-    sprintf(str, "%ld.", dif_sec);
-
-    sprintf(nsec, "%lld", dif_nsec);
-
-    strcat(str, nsec);
+    long long delta = convert_raw(t1) - convert_raw(t2);
+    int delta_sec = delta / 1000000000LL;
+    int delta_msec = (delta % 1000000000LL) / 1000000;
+    sprintf(str, "%d.%03d", delta_sec, delta_msec);
 }
