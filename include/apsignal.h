@@ -34,11 +34,9 @@ void ignore_signal(int signum);
 //                                          ERROR HANDLING
 // ====================================================================================================
 // Sections
-#define INIT_ALARM "Init alarm"
-#define INIT_INTR "Init interrupt"
+#define INIT_ALARM "Init alarm signal"
+#define INIT_INTR "Init interrupt signal"
+#define INIT_IGNORE "Init ignore signal"
 
 #define ERROR_REGISTER_SIGNAL_HANDLER "Error: Failed to register signal handler.\n"
-
-
-#define EXIT_REGISTER_SIGNAL_HANDLER_ERROR 314
 #endif
