@@ -25,37 +25,27 @@ void admpor_child_process_free(struct comm_buffers* buffers, struct main_data* d
     destroy_dynamic_memory_buffers(data, buffers);
 }
 
-int launch_client(int client_id, struct comm_buffers* buffers, struct main_data* data, struct semaphores* sems) {
+int launch_entity(int process_id, ExecuteFunction execute_fn, struct comm_buffers* buffers, struct main_data* data, struct semaphores* sems) {
     pid_t pid = fork();
     if (pid == 0) { // child process
         ignore_signal(SIGINT);
-        int processed_operations = execute_client(client_id, buffers, data, sems);
+        int processed_operations = execute_fn(process_id, buffers, data, sems);
         admpor_child_process_free(buffers, data, sems);
         exit(processed_operations);
     }
     return pid;
 }
 
+int launch_client(int client_id, struct comm_buffers* buffers, struct main_data* data, struct semaphores* sems) {
+    return launch_entity(client_id, execute_client, buffers, data, sems);
+}
+
 int launch_interm(int interm_id, struct comm_buffers* buffers, struct main_data* data, struct semaphores* sems) {
-    pid_t pid = fork();
-    if (pid == 0) { // child process
-        ignore_signal(SIGINT);
-        int processed_operations = execute_intermediary(interm_id, buffers, data, sems);
-        admpor_child_process_free(buffers, data, sems);
-        exit(processed_operations);
-    }
-    return pid;    
+    return launch_entity(interm_id, execute_intermediary, buffers, data, sems);
 }
 
 int launch_enterp(int enterp_id, struct comm_buffers* buffers, struct main_data* data, struct semaphores* sems) {
-    pid_t pid = fork();
-    if (pid == 0) { // child process
-        ignore_signal(SIGINT);
-        int processed_operations = execute_enterprise(enterp_id, buffers, data, sems);
-        admpor_child_process_free(buffers, data, sems);
-        exit(processed_operations);
-    }
-    return pid;    
+    return launch_entity(enterp_id, execute_enterprise, buffers, data, sems);   
 }
 
 int wait_process(int process_id) {

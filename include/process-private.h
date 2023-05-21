@@ -4,6 +4,12 @@
 /* Função que liberta a memória alocada em um processo filho do AdmPor */
 void admpor_child_process_free(struct comm_buffers* buffers, struct main_data* data, struct semaphores* sems);
 
+/* type ExecutionFunc representa um ponteiro para uma funcao de execução de entidade (cliente, interm, enterp) */ 
+typedef int (*ExecuteFunction)(int, struct comm_buffers*, struct main_data*, struct semaphores*);
+
+/* Função que cria um processo filho que executa a ExecuteFunction passada, representando um entidade (client, interm, enterp) */
+int launch_entity(int process_id, ExecuteFunction execute_fn, struct comm_buffers* buffers, struct main_data* data, struct semaphores* sems);
+
 // ====================================================================================================
 //                                          ERROR HANDLING
 // ====================================================================================================
