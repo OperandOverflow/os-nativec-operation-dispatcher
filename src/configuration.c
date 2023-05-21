@@ -20,20 +20,19 @@ struct ConfigurationFile* CONFIG_INIT(char* filename) {
         config_file->ptr = fopen(filename, "r");
 
         // verify if there was a problem during file opening
-        verify_condition(
+        assert_error(
             config_file->ptr == NULL,
             INIT_LOAD_CONFIGFILE,
-            ERROR_CONFIGFILE_OPEN,
-            EXIT_CONFIGFILE_OPEN_ERROR
+            ERROR_CONFIGFILE_OPEN
         );
     }
     return config_file;
 }
 
 void CONFIG_FREE(struct ConfigurationFile* config_file) {
-    if (config_file != NULL)
+    if (config_file && config_file->ptr)
         fclose(config_file->ptr);
-    free(config_file);
+    destroy_dynamic_memory(config_file);
 }
 
 int CONFIG_LOAD(struct ConfigurationFile* config_file, struct main_data* data, char* config_filename) {
@@ -86,17 +85,17 @@ int CONFIG_LOAD(struct ConfigurationFile* config_file, struct main_data* data, c
 
 void parse_config_file(char* config_filename, struct main_data* data) {
     struct ConfigurationFile* config_file = CONFIG_INIT(config_filename);
+    // vefify if config file is initialized
+    if (!config_file || !config_file->ptr) {
+        data->buffers_size = -1;
+        CONFIG_FREE(config_file);
+        return;        
+    }
+
     int loadedLines = CONFIG_LOAD(config_file, data, config_filename);
 
-    // set data to null if the configuration file is missing required fields
-    if (assert_error(
-        loadedLines < CONFIG_FILE_EXPECTED_LINE_COUNT,
-        INIT_LOAD_CONFIGFILE,
-        ERROR_CONFIGFILE_MISSING_REQUIRED_FIELDS)
-    ) {
-        // release allocated memory during config load, destroy data and set
-        //main_data_dynamic_memory_free(data);
-        //destroy_dynamic_memory(data);
+    // verify if the configuration file is missing required fields (set buffer size to -1)
+    if (assert_error(loadedLines < CONFIG_FILE_EXPECTED_LINE_COUNT, INIT_LOAD_CONFIGFILE, ERROR_CONFIGFILE_MISSING_REQUIRED_FIELDS)) {
         data->buffers_size = -1;
         CONFIG_FREE(config_file);
         return;

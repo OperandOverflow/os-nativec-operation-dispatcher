@@ -25,11 +25,9 @@
 #include "log.h"
 #include "stats.h"
 
-// global counter of created operations
-int operation_number = 0;
-
 // global variables
-struct AdmPorData admpor;
+struct AdmPorData admpor; // global AdmPor struct
+int operation_number = 0; // global counter of created operations
 
 void safe_free(void* ptr) {
     if (ptr) free(ptr);
@@ -109,25 +107,19 @@ void ADMPORDATA_INIT(int argc, char* argv[]) {
 
     // init main data structure
     create_dynamic_memory_buffers(data);
-    verify_condition(
-        !data->client_pids || !data->intermediary_pids || !data->enterprise_pids 
-        || !data->client_stats || !data->intermediary_stats || !data->enterprise_stats, 
-        INIT_DMEM_BUFFERS,
-        ERROR_MALLOC,
-        EXIT_FAILURE
-    );
+    failed = !data->client_pids || !data->intermediary_pids || !data->enterprise_pids 
+        || !data->client_stats || !data->intermediary_stats || !data->enterprise_stats;
+    if (assert_error(failed, INIT_DMEM_BUFFERS, ERROR_MALLOC))
+        return;
 
     // init shared memory buffers
     create_shared_memory_buffers(data, buffers);
-    verify_condition(
-        !data->results || !data->terminate 
+    failed = !data->results || !data->terminate 
         || !buffers->main_client->ptrs || !buffers->main_client->buffer
         || !buffers->client_interm->ptrs || !buffers->client_interm->buffer
-        || !buffers->interm_enterp->ptrs || !buffers->interm_enterp->buffer, 
-        INIT_SHMEM_BUFFERS,
-        ERROR_MALLOC,
-        EXIT_FAILURE
-    );
+        || !buffers->interm_enterp->ptrs || !buffers->interm_enterp->buffer;
+    if (assert_error(failed, INIT_SHMEM_BUFFERS, ERROR_MALLOC))
+        return;
 
     // create semaphores 
     create_semaphores(data, sems);
@@ -141,6 +133,11 @@ void ADMPORDATA_INIT(int argc, char* argv[]) {
     admpor.valid = TRUE;
     return;
 
+}
+
+void ADMPOR_EXIT(int status) {
+    ADMPORDATA_FREE();
+    exit(status);
 }
 
 void ADMPORDATA_FREE() {
@@ -409,8 +406,7 @@ void stop_execution(struct main_data* data, struct comm_buffers* buffers, struct
     wakeup_processes(data, sems);
     wait_processes(data);
     write_stats(data, operation_number);
-    ADMPORDATA_FREE();
-    exit(EXIT_SUCCESS);
+    ADMPOR_EXIT(EXIT_SUCCESS);
 }
 
 void user_interaction(struct comm_buffers *buffers, struct main_data *data, struct semaphores* sems) {
@@ -544,16 +540,16 @@ int main(int argc, char *argv[]) {
 
     // init AdmPor
     ADMPORDATA_INIT(argc, argv);
-    if (!admpor.valid) {
-        ADMPORDATA_FREE();
-        exit(EXIT_FAILURE);
-    }
+    if (!admpor.valid)
+        ADMPOR_EXIT(EXIT_FAILURE);
     
     // launch clients, interms and enterps
     launch_processes(admpor.buffers, admpor.data, admpor.sems);
 
     // init logger
     admpor.logger = LOG_INIT(admpor.data->log_filename);
+    if (!admpor.logger || !admpor.logger->ptr)
+        ADMPOR_EXIT(EXIT_FAILURE);
 
     // associate SIGINT with a handler function
     set_intr_handler(signal_handler_main);

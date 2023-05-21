@@ -29,9 +29,11 @@ struct AdmPorData {
     int valid;
 };
 
+/* Função que liberta memória e termina uma instância de AdmPor com o status passado */
+void ADMPOR_EXIT(int status);
+
 /* Função que inicializa uma instância AdmPorData */
 void ADMPORDATA_INIT(int argc, char* argv[]);
-//struct AdmPorData* ADMPORDATA_INIT(int argc, char* argv[]);
 
 /* Função que liberta uma instância AdmPorData */
 void ADMPORDATA_FREE();

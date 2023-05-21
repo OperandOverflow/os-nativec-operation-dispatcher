@@ -14,19 +14,14 @@ struct StatsFile* STATS_INIT(char* filename) {
         stats->ptr = fopen(filename, "w");
 
         // verify if there was a problem during file opening
-        verify_condition(
-            stats->ptr == NULL,
-            INIT_STATS,
-            ERROR_FAILED_OPEN_STATSFILE,
-            EXIT_OPEN_STATSFILE_ERROR
-        );
-        printf(INFO_LOADED_STATSFILE, filename);
+        if (!assert_error(stats->ptr == NULL, INIT_STATS, ERROR_FAILED_OPEN_STATSFILE))
+            printf(INFO_LOADED_STATSFILE, filename);
     }
     return stats;
 }
 
 void STATS_FREE(struct StatsFile* stats) {
-    if (stats != NULL)
+    if (stats && stats->ptr)
         fclose(stats->ptr);
     destroy_dynamic_memory(stats);
 }
@@ -34,7 +29,8 @@ void STATS_FREE(struct StatsFile* stats) {
 
 void write_stats(struct main_data* data, int op_counter) {
     struct StatsFile* stats = STATS_INIT(data->statistics_filename);
-    write_content(data, op_counter, stats->ptr);
+    if (stats && stats->ptr)
+        write_content(data, op_counter, stats->ptr);
     STATS_FREE(stats);
 }
 

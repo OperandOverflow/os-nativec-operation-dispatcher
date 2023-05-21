@@ -22,13 +22,8 @@ struct LoggingFile* LOG_INIT(char* filename) {
         logger->ptr = fopen(filename, "a+");
 
         // verify if there was a problem during file opening
-        verify_condition(
-            logger->ptr == NULL,
-            INIT_LOGFILE,
-            ERROR_LOGFILE_OPEN,
-            EXIT_LOGFILE_OPEN_ERROR
-        );
-        printf(INFO_LOADED_LOGFILE, filename);
+        if (!assert_error(logger->ptr == NULL, INIT_LOGFILE, ERROR_LOGFILE_OPEN))
+            printf(INFO_LOADED_LOGFILE, filename);
     }
     return logger;
 }
@@ -46,7 +41,7 @@ void ADMPOR_LOG(struct LoggingFile* logger, char* message) {
 }
 
 void LOG_FREE(struct LoggingFile* logger) {
-    if (logger != NULL)
+    if (logger && logger->ptr)
         fclose(logger->ptr);
     destroy_dynamic_memory(logger);
 }

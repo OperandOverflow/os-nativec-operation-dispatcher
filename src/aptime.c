@@ -8,11 +8,10 @@
 
 
 void set_current_time(struct timespec* spec) {
-    verify_condition(
+    assert_error(
         clock_gettime(CLOCK_REALTIME, spec) == -1,
         INIT_CLOCKGETTIME,
-        ERROR_CLOCKGETTIME,
-        EXIT_CLOCKGETTIME_ERROR
+        ERROR_CLOCKGETTIME
     );
 }
 

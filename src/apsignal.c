@@ -16,20 +16,18 @@ void ignore_signal(int signum) {
 }
 
 void set_timer(int inter, void (*handler)(int)) {
-    verify_condition(
+    assert_error(
         signal(SIGALRM, handler) == SIG_ERR,
         INIT_ALARM,
-        ERROR_REGISTER_SIGNAL_HANDLER,
-        EXIT_REGISTER_SIGNAL_HANDLER_ERROR
+        ERROR_REGISTER_SIGNAL_HANDLER
     );
     alarm(inter);
 }
 
 void set_intr_handler(void (*handler)(int)) {
-    verify_condition(
+    assert_error(
         signal(SIGINT, handler) == SIG_ERR,
         INIT_INTR,
-        ERROR_REGISTER_SIGNAL_HANDLER,
-        EXIT_REGISTER_SIGNAL_HANDLER_ERROR
+        ERROR_REGISTER_SIGNAL_HANDLER
     );
 }
