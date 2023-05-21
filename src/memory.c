@@ -42,7 +42,7 @@ void destroy_shared_memory(char* name, void* ptr, int size) {
     );
 
     assert_error(
-        shm_unlink(name) == -1,
+        shm_unlink(name_uid) == -1,
         name_uid,
         ERROR_SHM_UNLINK
     );
