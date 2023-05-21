@@ -13,7 +13,11 @@ int launch_entity(int process_id, ExecuteFunction execute_fn, struct comm_buffer
 // ====================================================================================================
 //                                          ERROR HANDLING
 // ====================================================================================================
+// Sections
+#define INIT_SEMAPHORES "Init semaphores"
+
+// Error messages
 #define ERROR_PROCESS_WAITPID "Error: Failed to wait process %d.\n"
-#define ERROR_PROCESS_EXIT_NORMALLY "Child process %d did not terminate normally.\n"
+#define ERROR_PROCESS_EXIT_NORMALLY "Error: Child process %d did not terminate normally.\n"
 
 #endif

@@ -38,5 +38,6 @@ void ignore_signal(int signum);
 #define INIT_INTR "Init interrupt signal"
 #define INIT_IGNORE "Init ignore signal"
 
+// Error messages
 #define ERROR_REGISTER_SIGNAL_HANDLER "Error: Failed to register signal handler.\n"
 #endif

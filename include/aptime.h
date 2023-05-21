@@ -57,5 +57,6 @@ void calculate_difference(struct timespec* t1, struct timespec* t2, char* str);
 // Sections
 #define INIT_CLOCKGETTIME "Set Current Time"
 
+// Error messages
 #define ERROR_CLOCKGETTIME "Error: Failed to get current time using clock_gettime."
 #endif

@@ -23,9 +23,7 @@ int are_semaphores_valid(struct semaphores* sems);
 */
 void consume_begin_undo(struct prodcons* pc);
 
-// Error handling constants
+// Error messages
 #define ERROR_SEM_CREATE    "Error: Failed to create the semaphores. Destroying all created semaphores and exiting.\n"
-
-#define EXIT_SEM_CREATE_ERROR   81
 
 #endif

@@ -23,23 +23,18 @@ void ADMPOR_LOG(struct LoggingFile* logger, char* message);
 /* Função que destrói um Logger*/
 void LOG_FREE(struct LoggingFile* logger);
 
-
-
-
-// Information messages
-#define INFO_LOADED_LOGFILE "\033[1;32m[+]\033[0m \033[1;36m%s\033[0m was successfully loaded as log file!\033[0m\n"
-
 // ====================================================================================================
 //                                          ERROR HANDLING
 // ====================================================================================================
 // Sections
 #define INIT_LOGFILE "Init Log file"
 
+// Information messages
+#define INFO_LOADED_LOGFILE "\033[1;32m[+]\033[0m \033[1;36m%s\033[0m was successfully loaded as log file!\033[0m\n"
+
+// Error messages
 #define ERROR_LOGFILE_ALREADY_EXISTS "Error: Unable to create log file, since the log file is already open.\n"
 #define ERROR_LOGFILE_OPEN "Error: Unable to open log file.\n"
 #define ERROR_LOGFILE_NOT_ACTIVE "Error: Log file is not properly set (open)."
-
-#define EXIT_LOGFILE_ALREADY_EXISTS_ERROR 121
-#define EXIT_LOGFILE_OPEN_ERROR 122
 
 #endif

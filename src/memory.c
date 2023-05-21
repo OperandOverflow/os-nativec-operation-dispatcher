@@ -20,6 +20,27 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+void main_data_dynamic_memory_free(struct main_data* data) {
+    if (data != NULL) {
+        destroy_dynamic_memory(data->client_pids);
+        destroy_dynamic_memory(data->intermediary_pids);
+        destroy_dynamic_memory(data->enterprise_pids);
+        destroy_dynamic_memory(data->client_stats);
+        destroy_dynamic_memory(data->intermediary_stats);
+        destroy_dynamic_memory(data->enterprise_stats);
+        destroy_dynamic_memory(data->log_filename);
+        destroy_dynamic_memory(data->statistics_filename);       
+    }
+}
+
+void comm_buffers_dynamic_memory_free(struct comm_buffers* buffers) {
+    if (buffers != NULL) {
+        destroy_dynamic_memory(buffers->main_client);
+        destroy_dynamic_memory(buffers->client_interm);
+        destroy_dynamic_memory(buffers->interm_enterp);
+    }
+}
+
 void flush() {
     int c;
     while ((c = getchar()) != '\n' && c != EOF) { }

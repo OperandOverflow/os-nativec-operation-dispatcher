@@ -19,6 +19,7 @@
 #include "memory-private.h"
 #include "aptime.h"
 #include "process.h"
+#include "process-private.h"
 #include "apsignal.h"
 #include "configuration.h"
 #include "synchronization.h"
@@ -96,11 +97,9 @@ void ADMPORDATA_INIT(int argc, char* argv[]) {
 
     // create semaphores 
     create_semaphores(data, sems);
-    if (!are_semaphores_valid(sems)) {
-        printf(ERROR_SEM_CREATE);
-        destroy_semaphores(sems);
-        exit(EXIT_SEM_CREATE_ERROR);
-    }
+    if (assert_error(!are_semaphores_valid(sems), INIT_SEMAPHORES, ERROR_SEM_CREATE))
+        return;
+
     // admpor was successfully initialized!
     admpor.valid = TRUE;
     return;
@@ -214,27 +213,6 @@ void create_semaphores(struct main_data* data, struct semaphores* sems) {
 // ====================================================================================================
 //                                           Destroy memory
 // ====================================================================================================
-void main_data_dynamic_memory_free(struct main_data* data) {
-    if (data != NULL) {
-        destroy_dynamic_memory(data->client_pids);
-        destroy_dynamic_memory(data->intermediary_pids);
-        destroy_dynamic_memory(data->enterprise_pids);
-        destroy_dynamic_memory(data->client_stats);
-        destroy_dynamic_memory(data->intermediary_stats);
-        destroy_dynamic_memory(data->enterprise_stats);
-        destroy_dynamic_memory(data->log_filename);
-        destroy_dynamic_memory(data->statistics_filename);       
-    }
-}
-
-void comm_buffers_dynamic_memory_free(struct comm_buffers* buffers) {
-    if (buffers != NULL) {
-        destroy_dynamic_memory(buffers->main_client);
-        destroy_dynamic_memory(buffers->client_interm);
-        destroy_dynamic_memory(buffers->interm_enterp);
-    }
-}
-
 void destroy_dynamic_memory_buffers(struct main_data* data, struct comm_buffers* buffers) {
     // destroy main_data
     main_data_dynamic_memory_free(data);
