@@ -92,7 +92,7 @@ void alarm_print_status(struct main_data* data, struct semaphores* sems);
 
 
 // Error handling constants
-#define ERROR_ARGS "\033[0;31m[!] Error:\033[0m Number of arguments is should be 5. Execute `AdmPor -h` for 'help'.\n"
+#define ERROR_ARGS "\033[0;31m[!] Error:\033[0m Number of arguments is should be 1. Execute `AdmPor -h` for 'help'.\n"
 #define ERROR_MALLOC "\033[0;31m[!] Error:\033[0m Failed to allocate memory.\n"
 #define ERROR_CLIENT_ID "\033[0;31m[!] Error:\033[0m The referred client doesn't exist!\n"
 #define ERROR_ENTERPRISE_ID "\033[0;31m[!] Error:\033[0m The referred enterprise doesn't exist!\n"

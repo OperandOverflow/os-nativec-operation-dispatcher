@@ -425,6 +425,14 @@ void alarm_handler(int interval) {
 }
 
 int main(int argc, char *argv[]) {
+    // launch usage menu
+    usage_menu(argc, argv);
+    verify_condition(
+        argc != NUMBER_OF_ARGS,
+        INIT_MAIN,
+        ERROR_ARGS,
+        EXIT_FAILURE
+    );
     
     //init data structures
     struct main_data* data = create_dynamic_memory(sizeof(struct main_data));
@@ -455,14 +463,6 @@ int main(int argc, char *argv[]) {
         EXIT_FAILURE
     );
 
-    // launch usage menu
-    usage_menu(argc, argv);
-    verify_condition(
-        argc != NUMBER_OF_ARGS,
-        INIT_MAIN,
-        ERROR_ARGS,
-        EXIT_FAILURE
-    );
     //execute main code
     main_args(argc, argv, data);    
     create_dynamic_memory_buffers(data);
