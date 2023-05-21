@@ -28,6 +28,9 @@ int CONFIG_LOAD(struct ConfigurationFile* config_file, struct main_data* data, c
 /* Função que atualiza main_data com os valores no ficheiro config_filename. data->buffer_size fica a -1 em caso de erro */
 void parse_config_file(char* config_filename, struct main_data* data);
 
+// ====================================================================================================
+//                                          ERROR HANDLING
+// ====================================================================================================
 // Sections
 #define INIT_LOAD_CONFIGFILE "Load Config File"
 
@@ -41,8 +44,5 @@ void parse_config_file(char* config_filename, struct main_data* data);
 #define ERROR_CONFIGFILE_OPEN "Error: Failed to open the configuration file.\n"
 #define ERROR_CONFIGFILE_NOT_ACTIVE "Error: Configuration file is not properly set (open).\n"
 #define ERROR_CONFIGFILE_MISSING_REQUIRED_FIELDS "Error: Configuration file is missing required fields.\n"
-
-#define EXIT_CONFIGFILE_OPEN_ERROR 81
-#define EXIT_CONFIGFILE_NUMBER_OF_LINES_ERROR 82
 
 #endif
