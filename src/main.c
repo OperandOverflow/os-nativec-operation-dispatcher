@@ -325,15 +325,15 @@ void alarm_print_status(struct main_data* data, struct semaphores* sems) {
         struct operation op = data->results[i];
         int statusInt = convert_status_to_int(op.status);
         printf(ALARM_MSG_OPERATION, op.id, op.status);
-        printf(ALARM_MSG_MAIN_CREATED, convert_raw(&op.start_time));
+        printf(ALARM_MSG_MAIN_CREATED, convert_raw_sec(&op.start_time));
         if (0 < statusInt)
-            printf(ALARM_MSG_CLIENT_PROCESSED, op.receiving_client, convert_raw(&op.client_time));
+            printf(ALARM_MSG_CLIENT_PROCESSED, op.receiving_client, convert_raw_sec(&op.client_time));
         if (1 < statusInt)
-            printf(ALARM_MSG_INTERM_PROCESSED, op.receiving_interm, convert_raw(&op.intermed_time));
+            printf(ALARM_MSG_INTERM_PROCESSED, op.receiving_interm, convert_raw_sec(&op.intermed_time));
         if (3 == statusInt)
-            printf(ALARM_MSG_ENTERP_BOOKED, op.receiving_enterp, convert_raw(&op.enterp_time));
+            printf(ALARM_MSG_ENTERP_BOOKED, op.receiving_enterp, convert_raw_sec(&op.enterp_time));
         if (3 < statusInt)
-            printf(ALAMR_MSG_ENTERP_PROCESSED, op.receiving_enterp, convert_raw(&op.enterp_time));
+            printf(ALAMR_MSG_ENTERP_PROCESSED, op.receiving_enterp, convert_raw_sec(&op.enterp_time));
     }
     semaphore_mutex_unlock(sems->results_mutex);
 }

@@ -23,8 +23,12 @@ char* get_datetime_string_from_rawtime(time_t rawtime, char* format) {
     return datetime;
 }
 
-long long convert_raw(struct timespec* spec) {
+long long convert_raw_nsec(struct timespec* spec) {
     return spec->tv_sec * 1000000000LL + spec->tv_nsec;
+}
+
+long long convert_raw_sec(struct timespec* spec) {
+    return convert_raw_nsec(spec) / 1000000000LL;
 }
 
 char* get_datetime_string_from_spec(struct timespec* spec) {
@@ -47,7 +51,10 @@ char* get_current_datetime_string() {
 }
 
 void calculate_difference(struct timespec* t1, struct timespec* t2, char* str) {
-    long long delta = convert_raw(t1) - convert_raw(t2);
+    long long delta = convert_raw_nsec(t1) - convert_raw_nsec(t2);
+    if (delta < 0)
+        delta *= -1;
+
     int delta_sec = delta / 1000000000LL;
     int delta_msec = (delta % 1000000000LL) / 1000000;
     sprintf(str, "%d.%03d", delta_sec, delta_msec);

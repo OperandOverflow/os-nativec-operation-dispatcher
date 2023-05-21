@@ -6,8 +6,11 @@
 /* Função que atualiza spec com o tempo atual */
 void set_current_time(struct timespec* spec);
 
-/* Função que converte os tempos em spec para um formato raw (em nanosegundos) */
-long long convert_raw(struct timespec* spec);
+/* Função que converte os tempos em spec para um formato raw (em segundos) */
+long long convert_raw_sec(struct timespec* spec);
+
+/* Função que converte os tempos em spec para um formato raw (em nano segundos) */
+long long convert_raw_nsec(struct timespec* spec);
 
 /* Função que recebe um rawtime e um formato, devolvendo uma representação string da data no dado formato */
 char* get_datetime_string_from_rawtime(time_t rawtime, char* format);
