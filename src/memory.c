@@ -35,18 +35,16 @@ void destroy_shared_memory(char* name, void* ptr, int size) {
     char name_uid[strlen(name)+10];
     sprintf(name_uid,"%s_%d", name, uid);
 
-    verify_condition(
+    assert_error(
         munmap(ptr, size) == -1,
-        name,
-        ERROR_SHM_UNMAP, 
-        EXIT_MUNMAP_ERROR
+        name_uid,
+        ERROR_SHM_UNMAP
     );
 
-    verify_condition(
+    assert_error(
         shm_unlink(name) == -1,
-        name,
-        ERROR_SHM_UNLINK, 
-        EXIT_SHM_UNLINK_ERROR
+        name_uid,
+        ERROR_SHM_UNLINK
     );
 }
 
@@ -55,28 +53,25 @@ void* create_shared_memory(char *name, int size) {
     char name_uid[strlen(name)+10];
     sprintf(name_uid,"%s_%d", name, uid);
  
-    int fd = shm_open(name, O_RDWR|O_CREAT|O_TRUNC, S_IRUSR|S_IWUSR); 
-    verify_condition(
+    int fd = shm_open(name_uid, O_RDWR|O_CREAT|O_TRUNC, S_IRUSR|S_IWUSR); 
+    if (assert_error(
         fd == -1, 
-        name, 
-        ERROR_SHM_OPEN,
-        EXIT_SHM_OPEN_ERROR
-    );
+        name_uid, 
+        ERROR_SHM_OPEN
+    )) return NULL;
 
-    verify_condition(
+    if (assert_error(
         ftruncate(fd, size) == -1, 
         name, 
-        ERROR_SHM_TRUNCATE,
-        EXIT_SHM_TRUNCATE_ERROR
-    );
+        ERROR_SHM_TRUNCATE
+    )) return NULL;
 
     int *shmem_ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0); 
-    verify_condition(
+    if (assert_error(
         shmem_ptr == MAP_FAILED, 
         name, 
-        ERROR_SHM_MAP,
-        EXIT_SHM_MAP_ERROR
-    );
+        ERROR_SHM_MAP
+    )) return NULL;
 
     return shmem_ptr;
 }
