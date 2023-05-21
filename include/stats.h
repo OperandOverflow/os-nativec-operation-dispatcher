@@ -1,3 +1,11 @@
+/**
+ * SO-035
+ * Guilherme Marcelo    <fc58173>
+ * Eduardo Santos       <fc58185>
+ * Xi Wang              <fc58183>
+*/
+
+
 #ifndef STATS_H_GUARD
 #define STATS_H_GUARD
 

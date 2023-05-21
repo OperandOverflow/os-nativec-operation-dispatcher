@@ -1,3 +1,10 @@
+/**
+ * SO-035
+ * Guilherme Marcelo    <fc58173>
+ * Eduardo Santos       <fc58185>
+ * Xi Wang              <fc58183>
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
