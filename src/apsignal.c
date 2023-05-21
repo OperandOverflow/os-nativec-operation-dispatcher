@@ -20,11 +20,23 @@ void ignore_signal(int signum) {
 }
 
 void set_timer(int inter, void (*handler)(int)) {
+    // attempt to implement with sigaction
+    struct sigaction sa;
+    sa.sa_handler = handler; // set handler function
+    sigemptyset(&sa.sa_mask); // no signal is blocked during execution of handler
+    sa.sa_flags = SA_RESTART; // after handling, restart waiting processes
     assert_error(
-        signal(SIGALRM, handler) == SIG_ERR,
+        sigaction(SIGALRM, &sa, NULL) == SIG_ERR,
         INIT_ALARM,
         ERROR_REGISTER_SIGNAL_HANDLER
     );
+
+    // traditional implementation
+    // assert_error(
+    //     signal(SIGALRM, handler) == SIG_ERR,
+    //     INIT_ALARM,
+    //     ERROR_REGISTER_SIGNAL_HANDLER
+    // );
     alarm(inter);
 }
 
