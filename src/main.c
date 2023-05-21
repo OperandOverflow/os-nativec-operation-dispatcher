@@ -12,6 +12,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <signal.h>
+#include <errno.h>
 
 #include "main.h"
 #include "main-private.h"
@@ -356,7 +357,6 @@ void alarm_print_status(struct main_data* data, struct semaphores* sems) {
         if (3 < statusInt)
             printf(ALAMR_MSG_ENTERP_PROCESSED, op.receiving_enterp, convert_raw(&op.enterp_time));
     }
-    printf(ADMPOR_SHELL);
     semaphore_mutex_unlock(sems->results_mutex);
 }
 
@@ -540,7 +540,11 @@ void user_interaction(struct comm_buffers *buffers, struct main_data *data, stru
         printf(ADMPOR_SHELL);
 
         // ask for input
-        if (scanf("%31s", input) != 1) {
+        int scanResp = scanf("%31s", input);
+        if (scanResp == -1 && errno == EINTR) {
+            continue;
+        }
+        if (scanResp != 1) {
             printf(ERROR_INVALID_INPUT);
             flush();
             return;

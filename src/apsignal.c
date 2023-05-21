@@ -20,7 +20,7 @@ void set_timer(int inter, void (*handler)(int)) {
     struct sigaction sa;
     sa.sa_handler = handler; // set handler function
     sigemptyset(&sa.sa_mask); // no signal is blocked during execution of handler
-    sa.sa_flags = SA_RESTART; // after handling, restart waiting processes
+    sa.sa_flags = 0; // no flags
     assert_error(
         sigaction(SIGALRM, &sa, NULL) == SIG_ERR,
         INIT_ALARM,
