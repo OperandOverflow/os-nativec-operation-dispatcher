@@ -19,16 +19,11 @@
 #include "main-private.h"
 #include "synchronization.h"
 #include "synchronization-private.h"
-#include "client-private.h"
-
-int op_counter_c;
 
 int execute_client(int client_id, struct comm_buffers* buffers, struct main_data* data, struct semaphores* sems) {
     // first, setup op and op_counter_c
-    struct operation op = {0, 0, 0, 0, 0, 0};
-    op_counter_c = 0;
-    // then associate SIGINT with the handler function
-    set_intr_handler(signal_handler_client);
+    struct operation op = { 0 };
+    int op_counter_c = 0;
     while ((*data->terminate) == 0) { // while did not receive terminate flag...
         client_get_operation(&op, client_id, buffers, data, sems); // read op from buffer
         // if there's no op to do
@@ -46,7 +41,10 @@ int execute_client(int client_id, struct comm_buffers* buffers, struct main_data
 }
 
 void client_get_operation(struct operation* op, int client_id, struct comm_buffers* buffers, struct main_data* data, struct semaphores* sems) {
-    if (*(data->terminate) == 1) return; // return if program received terminate flag
+    if (*(data->terminate) == 1) {
+       //op->id = -1;
+        return; // return if program received terminate flag
+    }
     // read main-client buffer
     consume_begin(sems->main_client);
     read_main_client_buffer(buffers->main_client, client_id, data->buffers_size, op);
@@ -75,8 +73,4 @@ void client_send_operation(struct operation* op, struct comm_buffers* buffers, s
     produce_begin(sems->client_interm);
     write_client_interm_buffer(buffers->client_interm, data->buffers_size, op);
     produce_end(sems->client_interm);
-}
-
-void signal_handler_client(int i) {
-    exit(op_counter_c);
 }

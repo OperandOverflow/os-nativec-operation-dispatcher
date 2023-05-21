@@ -17,16 +17,11 @@
 #include "main-private.h"
 #include "synchronization.h"
 #include "synchronization-private.h"
-#include "enterprise-private.h"
-
-int op_counter_e;
 
 int execute_enterprise(int enterp_id, struct comm_buffers* buffers, struct main_data* data, struct semaphores* sems) {
     // first, setup op and op_counter_e
     struct operation op = {0, 0, 0, 0, 0, 0};
-    op_counter_e = 0;
-    // then associate SIGINT with the handler function
-    set_intr_handler(signal_handler_enterprise);
+    int op_counter_e = 0;
     while ((*data->terminate) == 0) { // while did not receive terminate flag...
         enterprise_receive_operation(&op, enterp_id, buffers, data, sems); // read op from buffer
         // if there's no op to do
@@ -67,8 +62,4 @@ void enterprise_process_operation(struct operation* op, int enterp_id, struct ma
     semaphore_mutex_lock(sems->results_mutex);
     memcpy(&data->results[op->id], op, sizeof(struct operation));
     semaphore_mutex_unlock(sems->results_mutex);
-}
-
-void signal_handler_enterprise(int i) {
-    exit(op_counter_e);
 }

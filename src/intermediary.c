@@ -19,16 +19,11 @@
 #include "intermediary.h"
 #include "main-private.h"
 #include "synchronization.h"
-#include "intermediary-private.h"
-
-int op_counter_i;
 
 int execute_intermediary(int interm_id, struct comm_buffers* buffers, struct main_data* data, struct semaphores* sems) {
     // first, setup op and op_counter
     struct operation op = {0, 0, 0, 0, 0, 0};
-    op_counter_i = 0;
-    // then associate SIGINT with the handler function
-    set_intr_handler(signal_handler_intermediary);
+    int op_counter_i = 0;
     while ((*data->terminate) == 0) { // while did not receive terminate flag...
         intermediary_receive_operation(&op, buffers, data, sems); // read op from buffer
         // if there's no op to do
@@ -70,8 +65,4 @@ void intermediary_send_answer(struct operation* op, struct comm_buffers* buffers
     produce_begin(sems->interm_enterp);
     write_interm_enterp_buffer(buffers->interm_enterp, data->buffers_size, op);
     produce_end(sems->interm_enterp);
-}
-
-void signal_handler_intermediary(int i) {
-    exit(op_counter_i);
 }
