@@ -3,31 +3,16 @@
 
 #include <signal.h>
 
-/**
- * Function that constantly calls the function passed as 
- * parameter in the defined interval
- * @param interval  interval (in seconds) to call
- * @param f         funcion to be called
-*/
+/** Função que define a execução da função f a cada inter segundos */
 void set_timer(int inter, void (*f)(int));
 
-/**
- * Function that handles SIGINT signal and calls the 
- * function passed as parameter
- * @param f         function to be called when receives SIGINT
-*/
+/* Função que define um controlador de SIGINT como a função handler */
 void set_intr_handler(void (*handler)(int));
 
-/**
- * Handler that ignores a signum signal
- * @param signum         signal to ignore
-*/
+/* Função que ignora um sinal */
 void ignore_signal_handler(int signum);
 
-/**
- * Function that setup a signal handler that ignores a signum signal
- * @param signum         signal to ignore
-*/
+/* Função que define um controlador de signum como a função que ignora o sinal */
 void ignore_signal(int signum);
 
 // ====================================================================================================
