@@ -563,7 +563,7 @@ void user_interaction(struct comm_buffers *buffers, struct main_data *data, stru
 }
 #endif
 
-
+#ifndef ADMPOR_MAIN
 // ====================================================================================================
 //                                              Main
 // ====================================================================================================
@@ -599,3 +599,4 @@ int main(int argc, char *argv[]) {
     // launch user interaction menu
     user_interaction(admpor.buffers, admpor.data, admpor.sems);
 }
+#endif
