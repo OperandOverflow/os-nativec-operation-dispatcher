@@ -7,6 +7,14 @@
 #include "apsignal.h"
 #include "main-private.h"
 
+void ignore_signal_handler(int signum) {
+    return;
+}
+
+void ignore_signal(int signum) {
+    signal(signum, ignore_signal_handler);
+}
+
 void set_timer(int inter, void (*handler)(int)) {
     verify_condition(
         signal(SIGALRM, handler) == SIG_ERR,
@@ -24,8 +32,4 @@ void set_intr_handler(void (*handler)(int)) {
         ERROR_REGISTER_SIGNAL_HANDLER,
         EXIT_REGISTER_SIGNAL_HANDLER_ERROR
     );
-}
-
-void interrupt_process(int process_id) {
-    kill(process_id, SIGINT);
 }

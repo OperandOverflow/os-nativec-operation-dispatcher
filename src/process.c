@@ -18,6 +18,7 @@
 #include "synchronization.h"
 #include "main-private.h"
 #include "process-private.h"
+#include "apsignal.h"
 
 void admpor_child_process_free(struct comm_buffers* buffers, struct main_data* data, struct semaphores* sems) {
     destroy_semaphores(sems);
@@ -27,6 +28,7 @@ void admpor_child_process_free(struct comm_buffers* buffers, struct main_data* d
 int launch_client(int client_id, struct comm_buffers* buffers, struct main_data* data, struct semaphores* sems) {
     pid_t pid = fork();
     if (pid == 0) { // child process
+        ignore_signal(SIGINT);
         int processed_operations = execute_client(client_id, buffers, data, sems);
         admpor_child_process_free(buffers, data, sems);
         exit(processed_operations);
@@ -37,6 +39,7 @@ int launch_client(int client_id, struct comm_buffers* buffers, struct main_data*
 int launch_interm(int interm_id, struct comm_buffers* buffers, struct main_data* data, struct semaphores* sems) {
     pid_t pid = fork();
     if (pid == 0) { // child process
+        ignore_signal(SIGINT);
         int processed_operations = execute_intermediary(interm_id, buffers, data, sems);
         admpor_child_process_free(buffers, data, sems);
         exit(processed_operations);
@@ -47,6 +50,7 @@ int launch_interm(int interm_id, struct comm_buffers* buffers, struct main_data*
 int launch_enterp(int enterp_id, struct comm_buffers* buffers, struct main_data* data, struct semaphores* sems) {
     pid_t pid = fork();
     if (pid == 0) { // child process
+        ignore_signal(SIGINT);
         int processed_operations = execute_enterprise(enterp_id, buffers, data, sems);
         admpor_child_process_free(buffers, data, sems);
         exit(processed_operations);

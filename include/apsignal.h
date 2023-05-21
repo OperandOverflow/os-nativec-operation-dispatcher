@@ -19,10 +19,16 @@ void set_timer(int inter, void (*f)(int));
 void set_intr_handler(void (*handler)(int));
 
 /**
- * Function that sends a SIGINT signal to the refered process
- * @param process_id    process to which SIGINT will be sent
+ * Handler that ignores a signum signal
+ * @param signum         signal to ignore
 */
-void interrupt_process(int process_id);
+void ignore_signal_handler(int signum);
+
+/**
+ * Function that setup a signal handler that ignores a signum signal
+ * @param signum         signal to ignore
+*/
+void ignore_signal(int signum);
 
 // ====================================================================================================
 //                                          ERROR HANDLING
