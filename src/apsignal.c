@@ -26,17 +26,10 @@ void set_timer(int inter, void (*handler)(int)) {
     sigemptyset(&sa.sa_mask); // no signal is blocked during execution of handler
     sa.sa_flags = 0; // no flags
     assert_error(
-        sigaction(SIGALRM, &sa, NULL) == SIG_ERR,
+        sigaction(SIGALRM, &sa, NULL) == -1,
         INIT_ALARM,
         ERROR_REGISTER_SIGNAL_HANDLER
     );
-
-    // traditional implementation
-    // assert_error(
-    //     signal(SIGALRM, handler) == SIG_ERR,
-    //     INIT_ALARM,
-    //     ERROR_REGISTER_SIGNAL_HANDLER
-    // );
     alarm(inter);
 }
 

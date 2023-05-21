@@ -344,7 +344,7 @@ void signal_handler_main(int i) {
 
 void alarm_handler(int interval) {
     alarm_print_status(admpor.data, admpor.sems);
-    set_timer(admpor.data->alarm_time, alarm_handler);
+    alarm(admpor.data->alarm_time);
 }
 #endif
 
