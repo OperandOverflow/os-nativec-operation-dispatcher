@@ -294,7 +294,6 @@ void destroy_memory_buffers(struct main_data* data, struct comm_buffers* buffers
 
 
 void stop_execution(struct main_data* data, struct comm_buffers* buffers, struct semaphores* sems) {
-    ADMPOR_LOG(logger, "stop");
     *(data->terminate) = 1;
     wakeup_processes(data, sems);
     wait_processes(data);
@@ -324,6 +323,7 @@ void user_interaction(struct comm_buffers *buffers, struct main_data *data, stru
         } else if (strcmp(input, "status") == 0) {
             read_status(data, sems);
         } else if (strcmp(input, "stop") == 0) {
+            ADMPOR_LOG(logger, "stop");
             running = FALSE;
             stop_execution(data, buffers, sems);
         } else if (strcmp(input, "help") == 0) {
