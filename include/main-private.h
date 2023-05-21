@@ -12,12 +12,6 @@
 #include "synchronization.h"
 #include "log.h"
 
-/* Função que liberta memória dinamica de uma estrutura main data */
-void main_data_dynamic_memory_free(struct main_data* data);
-
-/* Função que liberta memória dinamica de uma estrutura comm_buffers */
-void comm_buffers_dynamic_memory_free(struct comm_buffers* buffers);
-
 struct AdmPorData {
     struct main_data* data;
     struct comm_buffers* buffers;
@@ -117,8 +111,9 @@ void alarm_print_status(struct main_data* data, struct semaphores* sems);
 #define ALARM_MSG_ENTERP_BOOKED         "       -> \033[1;36mEnterprise <%d>\033[0m booked operation at %lld\n\n"
 #define ALAMR_MSG_ENTERP_PROCESSED      "       -> \033[1;36mEnterprise <%d>\033[0m processed operation at %lld\n\n"
 
-
-// Error handling constants
+// ====================================================================================================
+//                                          ERROR HANDLING
+// ====================================================================================================
 #define ERROR_ARGS "\033[0;31m[!] Error:\033[0m Number of arguments is should be 1. Execute `AdmPor -h` for 'help'.\n"
 #define ERROR_MALLOC "\033[0;31m[!] Error:\033[0m Failed to allocate memory.\n"
 #define ERROR_CLIENT_ID "\033[0;31m[!] Error:\033[0m The referred client doesn't exist!\n"

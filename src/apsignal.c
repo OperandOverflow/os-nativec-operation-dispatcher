@@ -12,7 +12,11 @@ void ignore_signal_handler(int signum) {
 }
 
 void ignore_signal(int signum) {
-    signal(signum, ignore_signal_handler);
+    assert_error(
+        signal(signum, ignore_signal_handler) == SIG_ERR,
+        INIT_IGNORE,
+        ERROR_REGISTER_SIGNAL_HANDLER
+    );
 }
 
 void set_timer(int inter, void (*handler)(int)) {

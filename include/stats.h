@@ -52,12 +52,10 @@ void write_operation_statistics(struct operation op, FILE* fpointer);
 // Sections
 #define INIT_STATS "Init statistics file"
 
-// Information
+// Information messages
 #define INFO_LOADED_STATSFILE "\033[1;32m[+]\033[0m \033[1;36m%s\033[0m was successfully loaded as stats file!\033[0m\n"
 
-// Error handling constants
+// Error messages
 #define ERROR_FAILED_OPEN_STATSFILE "\033[0;31m[!] Error:\033[0m Failed to create file.\n" 
-
-#define EXIT_OPEN_STATSFILE_ERROR 140
 
 #endif
